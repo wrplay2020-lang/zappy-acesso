@@ -43,8 +43,8 @@ export async function POST(request: Request) {
   const id = crypto.randomUUID();
   const random = Array.from(crypto.getRandomValues(new Uint8Array(8)), byte => byte.toString(36).padStart(2, "0")).join("");
   const password = "Zp@" + random;
-  await db.prepare("INSERT INTO trial_requests (id, ip_hash, status, created_at) VALUES (?, ?, 'CREATING', ?)")
-    .bind(id, ipHash, Date.now()).run();
+  await db.prepare("INSERT INTO trial_requests (id, ip_hash, username, status, created_at) VALUES (?, ?, ?, 'CREATING', ?)")
+    .bind(id, ipHash, username, Date.now()).run();
   try {
     const response = await fetch("https://onzappy.com/api/v1/reseller/users/trial", {
       method: "POST",
@@ -62,7 +62,10 @@ export async function POST(request: Request) {
       data?: { id?: string; username?: string; password?: string; trialExpiresAt?: string; links?: { login?: string; android?: string } };
     };
     if (!response.ok || !body.success || !body.data?.id) {
-      await db.prepare("UPDATE trial_requests SET status = 'FAILED' WHERE id = ?").bind(id).run();
+      const failure = response.status === 409 || ["username_taken", "username_exists", "user_exists", "conflict"].includes(body.error?.code ?? "")
+        ? "username_taken"
+        : body.error?.code === "trial_limit_reached" || response.status === 429 ? "trial_limit" : "zappy_error";
+      await db.prepare("UPDATE trial_requests SET status = 'FAILED', failure_code = ? WHERE id = ?").bind(failure, id).run();
       if (response.status === 409 || ["username_taken", "username_exists", "user_exists", "conflict"].includes(body.error?.code ?? "")) {
         return Response.json({ code: "username_taken", error: "Esse usuário já está em uso. Escolha outro nome." }, { status: 409 });
       }
@@ -79,6 +82,7 @@ export async function POST(request: Request) {
     }, { status: 201, headers: { "Cache-Control": "no-store" } });
   } catch {
     // A timeout can still create a trial remotely; count it against this IP.
+    await db.prepare("UPDATE trial_requests SET failure_code = 'unconfirmed' WHERE id = ?").bind(id).run().catch(() => {});
     return Response.json({ error: "Não conseguimos confirmar o teste. Aguarde um pouco antes de tentar de novo." }, { status: 502 });
   }
 }

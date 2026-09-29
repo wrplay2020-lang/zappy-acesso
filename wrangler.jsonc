@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "zappy-acesso",
+  "main": "vinext/server/fetch-handler",
+  "compatibility_date": "2026-09-28",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "not_found_handling": "none" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "zappy-acesso",
+      "database_id": "COLE_AQUI_O_ID_DO_SEU_D1"
+    }
+  ]
+}

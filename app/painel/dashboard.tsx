@@ -10,6 +10,12 @@ const labels: Record<string, string> = {
   username_taken: "Usuário já existe", trial_limit: "Limite da Zappy", zappy_error: "Erro da Zappy", unconfirmed: "Resposta não confirmada",
 };
 const sessionKey = "zappy-dashboard-key";
+const trialDurationMs = 24 * 60 * 60 * 1000;
+
+function trialWindow(item: Trial) {
+  if (item.status !== "CREATED") return "—";
+  return Date.now() < item.created_at + trialDurationMs ? "Dentro do prazo do teste" : "Prazo do teste encerrado";
+}
 
 export function Dashboard() {
   const [key, setKey] = useState("");
@@ -82,8 +88,9 @@ export function Dashboard() {
         <label>Período <select value={period} onChange={event => { setPeriod(event.target.value); void load(undefined, event.target.value, status); }}><option value="day">24 horas</option><option value="week">7 dias</option><option value="month">30 dias</option></select></label>
         <label>Resultado <select value={status} onChange={event => { setStatus(event.target.value); void load(undefined, period, event.target.value); }}><option value="all">Todos</option><option value="CREATED">Criados</option><option value="FAILED">Falharam</option><option value="CREATING">Sem confirmação</option></select></label>
       </div>
-      {stats.history.length ? <div className="dashboard-table-wrap"><table><thead><tr><th>Quando</th><th>Usuário</th><th>Resultado</th><th>Motivo</th></tr></thead><tbody>{stats.history.map(item => <tr key={item.id}><td>{new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" }).format(item.created_at)}</td><td>{item.username ?? "Registro anterior"}</td><td>{labels[item.status] ?? item.status}</td><td>{labels[item.failure_code ?? ""] ?? (item.status === "FAILED" ? "Não registrado" : "—")}</td></tr>)}</tbody></table></div> : <p>Nenhuma tentativa nesse filtro.</p>}
+      {stats.history.length ? <div className="dashboard-table-wrap"><table><thead><tr><th>Quando</th><th>Usuário</th><th>Resultado</th><th>Prazo do teste</th><th>Motivo</th></tr></thead><tbody>{stats.history.map(item => <tr key={item.id}><td>{new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" }).format(item.created_at)}</td><td>{item.username ?? "Registro anterior"}</td><td>{labels[item.status] ?? item.status}</td><td>{trialWindow(item)}</td><td>{labels[item.failure_code ?? ""] ?? (item.status === "FAILED" ? "Não registrado" : "—")}</td></tr>)}</tbody></table></div> : <p>Nenhuma tentativa nesse filtro.</p>}
       <p className="dashboard-note">Mostrando até 50 tentativas. Usuários e motivos passam a aparecer para novos registros após a atualização do banco.</p>
+      <p className="dashboard-note">Prazo estimado de 24 horas após a criação. O site ainda não consulta a conta na Zappy; se o usuário assinou depois, esta coluna não informa se a assinatura está ativa.</p>
     </section>
     <section className="dashboard-history"><h2>Falhas por motivo</h2>{stats.reasons.length ? <ul>{stats.reasons.map((item, index) => <li key={`${item.failure_code}-${index}`}>{labels[item.failure_code ?? ""] ?? "Não registrado"}: <strong>{item.total}</strong></li>)}</ul> : <p>Nenhuma falha no período escolhido.</p>}</section>
     <p className="dashboard-note">Os números são de solicitações feitas por este site. Uma tentativa sem confirmação pode ter sido criada no Zappy após um atraso na resposta.</p>

@@ -20,5 +20,14 @@ export default function Home() {
         <img src="/zappy-celular.jpg" alt="" className="promo-image promo-third"/>
       </a>
     </section>
+    <section className="faq" aria-labelledby="faq-title">
+      <p className="eyebrow">DÚVIDAS RÁPIDAS</p>
+      <h2 id="faq-title">Como funciona o teste?</h2>
+      <div className="faq-list">
+        <details><summary>Como recebo meu acesso?</summary><p>Preencha seu nome e escolha um usuário. Depois de criar o teste, o login e a senha aparecem nesta página. Copie os dados antes de sair.</p></details>
+        <details><summary>Onde posso assistir?</summary><p>Você pode usar o aplicativo no Android, entrar pelo navegador ou abrir o Zappy no Safari do iPhone. Os links aparecem junto com seus dados de acesso.</p></details>
+        <details><summary>O que acontece depois das 24 horas?</summary><p>O acesso de teste termina. Se gostar, você pode adicionar 30 dias por R$ 20 via Pix dentro do aplicativo.</p></details>
+      </div>
+    </section>
   </main>;
 }

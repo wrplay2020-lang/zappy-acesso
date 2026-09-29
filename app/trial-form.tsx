@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { YellowRobot } from "./yellow-robot";
 
 type Access = { username: string; password: string; expiresAt?: string; login: string; android: string };
@@ -9,17 +9,28 @@ export function TrialForm() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [usernameTaken, setUsernameTaken] = useState(false);
+  const usernameRef = useRef<HTMLInputElement>(null);
 
   async function create(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault(); setBusy(true); setError("");
+    event.preventDefault(); setBusy(true); setError(""); setUsernameTaken(false);
     const data = new FormData(event.currentTarget);
     try {
       const response = await fetch("/api/trial", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: data.get("name"), username: String(data.get("username") ?? "").toLowerCase() }),
       });
-      const result = await response.json() as Access & { error?: string };
-      if (!response.ok) throw new Error(result.error ?? "Não foi possível criar o teste.");
+      const result = await response.json() as Access & { error?: string; code?: string };
+      if (!response.ok) {
+        if (response.status === 409 && result.code === "username_taken") {
+          setUsernameTaken(true);
+          setError("Esse usuário já está em uso. Escolha outro nome e tente novamente.");
+          usernameRef.current?.focus();
+          return;
+        }
+        throw new Error(result.error ?? "Não foi possível criar o teste.");
+      }
       setAccess(result);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Tente novamente mais tarde.");
@@ -30,7 +41,7 @@ export function TrialForm() {
     <p className="card-eyebrow">TUDO PRONTO</p><h2>Seu acesso está criado</h2>
     <p>Use estes dados para entrar no Zappy. Guarde o login e a senha em um lugar seguro.</p>
     <div className="trial-credential"><span>Usuário</span><strong>{access.username}</strong></div>
-    <div className="trial-credential"><span>Senha</span><strong>{access.password}</strong></div>
+    <div className="trial-credential"><span>Senha</span><div className="password-row"><strong>{showPassword ? access.password : "•".repeat(access.password.length)}</strong><button type="button" className="password-toggle" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} aria-pressed={showPassword}>{showPassword ? "Ocultar" : "Mostrar"}</button></div></div>
     {access.expiresAt && <p className="trial-expiry">Teste válido até {new Date(access.expiresAt).toLocaleString("pt-BR")}.</p>}
     <button type="button" onClick={async () => { await navigator.clipboard.writeText(`Login: ${access.username}\nSenha: ${access.password}`); setCopied(true); }}>{copied ? "Dados copiados" : "Copiar login e senha"}</button>
     <p className="access-heading">Agora escolha onde assistir:</p>
@@ -45,9 +56,9 @@ export function TrialForm() {
       <label htmlFor="trial-name">Seu nome</label>
       <input id="trial-name" name="name" type="text" autoComplete="name" placeholder="Digite seu nome" required minLength={3} maxLength={90}/>
       <label htmlFor="trial-username">Escolha seu usuário</label>
-      <input id="trial-username" name="username" type="text" autoComplete="username" autoCapitalize="none" spellCheck={false} placeholder="Ex.: joaosilva" required minLength={4} maxLength={20} pattern="[a-zA-Z0-9_]{4,20}" title="Use de 4 a 20 letras, números ou _; sem espaços e acentos" aria-describedby="username-help"/>
+      <input ref={usernameRef} id="trial-username" name="username" type="text" autoComplete="username" autoCapitalize="none" spellCheck={false} placeholder="Ex.: joaosilva" required minLength={4} maxLength={20} pattern="[a-zA-Z0-9_]{4,20}" title="Use de 4 a 20 letras, números ou _; sem espaços e acentos" aria-describedby={usernameTaken ? "username-help trial-error" : "username-help"} aria-invalid={usernameTaken} onChange={() => { if (usernameTaken) { setUsernameTaken(false); setError(""); } }}/>
       <span className="field-help" id="username-help">4 a 20 caracteres, sem espaços ou acentos.</span>
-      {error && <p className="trial-error" role="alert">{error}</p>}
+      {error && <p className="trial-error" id="trial-error" role="alert">{error}</p>}
       <button type="submit" disabled={busy}>{busy ? "Criando seu acesso…" : "Criar teste grátis"}</button>
     </form>
     <small>Depois do teste, você pode adicionar 30 dias por R$ 20 via Pix dentro do app.</small>

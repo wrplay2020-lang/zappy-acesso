@@ -124,6 +124,11 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .trial-credential { display: grid; gap: 3px; margin: 10px 0; padding: 11px 13px; border: 1px solid #e6e6e9; border-radius: 9px; background: #f5f5f7; word-break: break-word; }
 .trial-credential span { color: #66666d; font-size: 12px; }
 .trial-credential strong { font-size: 17px; }
+.password-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+.password-row strong { min-width: 0; overflow-wrap: anywhere; }
+.trial-card .password-toggle { width: auto; min-height: 32px; flex: none; margin: 0; padding: 5px 10px; border: 1px solid #d6d6db; background: #fff; color: #33333a; font-size: 12px; font-weight: 750; }
+.trial-card .password-toggle:hover { background: #ededf0; }
+.trial-card input[aria-invalid="true"] { border-color: #c81927; }
 .trial-card .trial-expiry { margin: 13px 0 0; color: #57575e; font-size: 13px; }
 .trial-card .access-heading { margin: 19px 0 8px; color: #2b2b31; font-size: 14px; font-weight: 800; }
 .trial-card > a {
@@ -167,6 +172,14 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .after-trial { max-width: 475px; margin: 18px 0 0; color: #a6a6ae; font-size: 13px; line-height: 1.5; }
 .after-trial strong { color: #f2f2f4; }
 
+.faq { max-width: 1200px; margin: 0 auto; padding: 0 32px 86px; }
+.faq h2 { margin: 14px 0 22px; font-size: clamp(26px, 3vw, 36px); letter-spacing: -.04em; }
+.faq-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.faq-list details { align-self: start; border: 1px solid #34343b; border-radius: 12px; background: #17171b; }
+.faq-list summary { padding: 19px 21px; font-weight: 750; cursor: pointer; }
+.faq-list summary:focus-visible { outline: 3px solid #ff5960; outline-offset: 3px; }
+.faq-list details p { margin: 0; padding: 0 21px 20px; color: #b9b9c0; font-size: 14px; line-height: 1.6; }
+
 .promo {
   display: block;
   position: relative;
@@ -199,6 +212,8 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   .intro { margin-bottom: 22px; font-size: 16px; }
   .trial-card { max-width: none; padding: 24px; }
   .promo { max-width: 500px; margin: 0 auto; }
+  .faq { padding: 0 20px 56px; }
+  .faq-list { grid-template-columns: 1fr; }
 }
 @media (max-width: 390px) {
   .topbar { padding: 0 16px; }
@@ -208,6 +223,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   .trial-card { padding: 21px; }
   .platform-links { gap: 6px; }
   .platform-links a { font-size: 12px; gap: 4px; padding: 8px 3px; }
+  .faq { padding-left: 16px; padding-right: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

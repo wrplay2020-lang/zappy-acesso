@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     if (!response.ok || !body.success || !body.data?.id) {
       await db.prepare("UPDATE trial_requests SET status = 'FAILED' WHERE id = ?").bind(id).run();
       if (response.status === 409 || ["username_taken", "username_exists", "user_exists", "conflict"].includes(body.error?.code)) {
-        return Response.json({ error: "Esse usuário já está em uso. Escolha outro nome." }, { status: 409 });
+        return Response.json({ code: "username_taken", error: "Esse usuário já está em uso. Escolha outro nome." }, { status: 409 });
       }
       const unavailable = body.error?.code === "trial_limit_reached" || response.status === 429;
       return Response.json({ error: unavailable ? "Os testes de hoje acabaram. Volte amanhã." : "Não foi possível criar o teste. Tente novamente." }, { status: unavailable ? 429 : 502 });

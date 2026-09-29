@@ -56,7 +56,6 @@ export function Dashboard() {
       <p className="dashboard-note">Mostrando até 50 tentativas. Usuários e motivos passam a aparecer para novos registros após a atualização do banco.</p>
     </section>
     <section className="dashboard-history"><h2>Falhas por motivo</h2>{stats.reasons.length ? <ul>{stats.reasons.map((item, index) => <li key={`${item.failure_code}-${index}`}>{labels[item.failure_code ?? ""] ?? "Não registrado"}: <strong>{item.total}</strong></li>)}</ul> : <p>Nenhuma falha no período escolhido.</p>}</section>
-    <section className="dashboard-history"><h2>Pagou, mas não ativou</h2><p>O pagamento é feito no aplicativo Zappy. Este site ainda não recebe a confirmação de pagamento nem o resultado da ativação; por isso não há casos para exibir automaticamente. Precisamos da integração de eventos ou consulta da Zappy para mostrar o usuário afetado aqui.</p></section>
     <p className="dashboard-note">Os números são de solicitações feitas por este site. Uma tentativa sem confirmação pode ter sido criada no Zappy após um atraso na resposta.</p>
   </div>;
 }

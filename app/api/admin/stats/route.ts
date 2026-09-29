@@ -9,16 +9,26 @@ export async function POST(request: Request) {
     return Response.json({ error: "Chave incorreta." }, { status: 401, headers: { "Cache-Control": "no-store" } });
   }
   const now = Date.now();
-  const [lastDay, lastWeek] = await Promise.all([
+  const url = new URL(request.url);
+  const period = url.searchParams.get("period") === "day" ? "day" : url.searchParams.get("period") === "month" ? "month" : "week";
+  const status = ["CREATED", "FAILED", "CREATING"].includes(url.searchParams.get("status") ?? "") ? url.searchParams.get("status")! : "all";
+  const start = now - (period === "day" ? 1 : period === "month" ? 30 : 7) * 86400000;
+  const [lastDay, lastWeek, history, reasons] = await Promise.all([
     env.DB.prepare("SELECT status, COUNT(*) AS total FROM trial_requests WHERE created_at >= ? GROUP BY status").bind(now - 86400000).all<{ status: string; total: number }>(),
     env.DB.prepare("SELECT status, COUNT(*) AS total FROM trial_requests WHERE created_at >= ? GROUP BY status").bind(now - 7 * 86400000).all<{ status: string; total: number }>(),
+    (status === "all"
+      ? env.DB.prepare("SELECT id, username, status, failure_code, created_at FROM trial_requests WHERE created_at >= ? ORDER BY created_at DESC LIMIT 50").bind(start)
+      : env.DB.prepare("SELECT id, username, status, failure_code, created_at FROM trial_requests WHERE created_at >= ? AND status = ? ORDER BY created_at DESC LIMIT 50").bind(start, status))
+      .all<{ id: string; username: string | null; status: string; failure_code: string | null; created_at: number }>(),
+    env.DB.prepare("SELECT failure_code, COUNT(*) AS total FROM trial_requests WHERE created_at >= ? AND status = 'FAILED' GROUP BY failure_code")
+      .bind(start).all<{ failure_code: string | null; total: number }>(),
   ]);
   const counts = (rows: { status: string; total: number }[]) => ({
     created: rows.find(row => row.status === "CREATED")?.total ?? 0,
     failed: rows.find(row => row.status === "FAILED")?.total ?? 0,
     pending: rows.find(row => row.status === "CREATING")?.total ?? 0,
   });
-  return Response.json({ lastDay: counts(lastDay.results), lastWeek: counts(lastWeek.results) }, { headers: { "Cache-Control": "no-store" } });
+  return Response.json({ lastDay: counts(lastDay.results), lastWeek: counts(lastWeek.results), history: history.results, reasons: reasons.results }, { headers: { "Cache-Control": "no-store" } });
 }
 
 async function matchesKey(a: string, b: string) {

@@ -4,7 +4,7 @@ export async function POST(request: Request) {
   if (!env.DB || !env.ZAPPY_API_KEY) return Response.json({ error: "Teste indisponível no momento." }, { status: 503 });
   const origin = request.headers.get("Origin");
   if (origin && origin !== new URL(request.url).origin) return Response.json({ error: "Solicitação inválida." }, { status: 403 });
-  let input: { name?: unknown; username?: unknown };
+  let input: { name?: unknown; username?: unknown; turnstileToken?: unknown };
   try { input = await request.json(); } catch { return Response.json({ error: "Dados inválidos." }, { status: 400 }); }
   const name = String(input.name ?? "").trim().replace(/\s+/g, " ").slice(0, 90);
   if (name.length < 3) return Response.json({ error: "Informe seu nome para criar o teste." }, { status: 400 });
@@ -14,6 +14,24 @@ export async function POST(request: Request) {
   }
 
   const ip = request.headers.get("CF-Connecting-IP") ?? request.headers.get("X-Forwarded-For")?.split(",")[0]?.trim();
+  if (env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET_KEY) {
+    const token = typeof input.turnstileToken === "string" ? input.turnstileToken : "";
+    if (!token || token.length > 2048) return Response.json({ error: "Confirme a verificação de segurança e tente novamente." }, { status: 400 });
+    try {
+      const verification = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secret: env.TURNSTILE_SECRET_KEY, response: token, remoteip: ip }),
+        signal: AbortSignal.timeout(8000),
+      });
+      const result = await verification.json() as { success?: boolean; hostname?: string; action?: string };
+      if (!verification.ok || !result.success || result.hostname !== new URL(request.url).hostname || result.action !== "trial") {
+        return Response.json({ error: "A verificação de segurança expirou ou falhou. Tente novamente." }, { status: 403 });
+      }
+    } catch {
+      return Response.json({ error: "Não conseguimos verificar a segurança agora. Tente novamente em instantes." }, { status: 503 });
+    }
+  }
   const db = env.DB;
   const ipHash = ip ? await hash(ip + env.ZAPPY_API_KEY) : "unknown";
   const recent = await db.prepare("SELECT COUNT(*) AS total FROM trial_requests WHERE ip_hash = ? AND created_at > ? AND status IN ('CREATING', 'CREATED')")
@@ -38,10 +56,14 @@ export async function POST(request: Request) {
       body: JSON.stringify({ username, password, name }),
       signal: AbortSignal.timeout(12000),
     });
-    const body = await response.json() as any;
+    const body = await response.json() as {
+      success?: boolean;
+      error?: { code?: string };
+      data?: { id?: string; username?: string; password?: string; trialExpiresAt?: string; links?: { login?: string; android?: string } };
+    };
     if (!response.ok || !body.success || !body.data?.id) {
       await db.prepare("UPDATE trial_requests SET status = 'FAILED' WHERE id = ?").bind(id).run();
-      if (response.status === 409 || ["username_taken", "username_exists", "user_exists", "conflict"].includes(body.error?.code)) {
+      if (response.status === 409 || ["username_taken", "username_exists", "user_exists", "conflict"].includes(body.error?.code ?? "")) {
         return Response.json({ code: "username_taken", error: "Esse usuário já está em uso. Escolha outro nome." }, { status: 409 });
       }
       const unavailable = body.error?.code === "trial_limit_reached" || response.status === 429;

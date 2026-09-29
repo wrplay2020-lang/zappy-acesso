@@ -1,9 +1,10 @@
 import { TrialForm } from "./trial-form";
+import Link from "next/link";
 
 export default function Home() {
   return <main className="site">
     <header className="topbar">
-      <a href="/" className="logo" aria-label="Zappy, início"><span className="logo-z">Z</span><span>Zappy</span></a>
+      <Link href="/" className="logo" aria-label="Zappy, início"><span className="logo-z">Z</span><span>Zappy</span></Link>
       <a href="https://onzappy.com/login" target="_blank" rel="noopener noreferrer" className="login-link">Já tenho acesso</a>
     </header>
     <section className="experience" aria-labelledby="page-title">

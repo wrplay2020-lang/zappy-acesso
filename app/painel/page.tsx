@@ -7,7 +7,7 @@ export default function Painel() {
       <Link className="dashboard-back" href="/">← Voltar para o site</Link>
       <p className="eyebrow">ACESSO RESTRITO</p>
       <h1>Painel de testes</h1>
-      <p>Veja quantos testes foram criados nas últimas 24 horas e nos últimos 7 dias.</p>
+      <p>Acompanhe os testes criados, as tentativas recentes e os motivos das falhas.</p>
       <Dashboard />
     </div>
   </main>;

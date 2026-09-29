@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Counts = { created: number; failed: number; pending: number };
 type Trial = { id: string; username: string | null; status: string; failure_code: string | null; created_at: number };
@@ -9,6 +9,7 @@ const labels: Record<string, string> = {
   CREATED: "Criado", FAILED: "Falhou", CREATING: "Sem confirmação",
   username_taken: "Usuário já existe", trial_limit: "Limite da Zappy", zappy_error: "Erro da Zappy", unconfirmed: "Resposta não confirmada",
 };
+const sessionKey = "zappy-dashboard-key";
 
 export function Dashboard() {
   const [key, setKey] = useState("");
@@ -17,21 +18,49 @@ export function Dashboard() {
   const [busy, setBusy] = useState(false);
   const [period, setPeriod] = useState("week");
   const [status, setStatus] = useState("all");
+  const [restoring, setRestoring] = useState(true);
+  const inFlight = useRef(false);
 
-  async function load(event?: React.FormEvent, nextPeriod = period, nextStatus = status) {
+  async function load(event?: React.FormEvent, nextPeriod = period, nextStatus = status, credential = key, silent = false) {
     event?.preventDefault();
-    setBusy(true); setError("");
+    if (inFlight.current || !credential) return;
+    inFlight.current = true;
+    if (!silent) setBusy(true);
+    setError("");
     try {
-      const response = await fetch(`/api/admin/stats?period=${nextPeriod}&status=${nextStatus}`, { method: "POST", headers: { "X-Dashboard-Key": key }, cache: "no-store" });
+      const response = await fetch(`/api/admin/stats?period=${nextPeriod}&status=${nextStatus}`, { method: "POST", headers: { "X-Dashboard-Key": credential }, cache: "no-store" });
       const body = await response.json() as Stats & { error?: string };
+      if (response.status === 401) {
+        sessionStorage.removeItem(sessionKey);
+        setKey(""); setStats(null);
+      }
       if (!response.ok) throw new Error(body.error ?? "Não foi possível carregar os números.");
       setStats(body);
+      sessionStorage.setItem(sessionKey, credential);
     } catch (cause) {
-      setStats(null);
       setError(cause instanceof Error ? cause.message : "Tente novamente.");
-    } finally { setBusy(false); }
+    } finally { inFlight.current = false; setBusy(false); setRestoring(false); }
   }
 
+  useEffect(() => {
+    const saved = sessionStorage.getItem(sessionKey);
+    if (saved) { setKey(saved); void load(undefined, "week", "all", saved); }
+    else setRestoring(false);
+    // Restore only once when the tab opens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!stats || !key) return;
+    const timer = window.setInterval(() => {
+      if (!document.hidden) void load(undefined, period, status, key, true);
+    }, 30000);
+    return () => window.clearInterval(timer);
+    // Refresh the current filters while the dashboard is open.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, period, status, Boolean(stats)]);
+
+  if (restoring) return <p className="dashboard-note">Carregando painel…</p>;
   if (!stats) return <form className="dashboard-login" onSubmit={load}>
     <label htmlFor="dashboard-key">Chave do painel</label>
     <input id="dashboard-key" type="password" autoComplete="off" value={key} onChange={event => setKey(event.target.value)} required />
@@ -40,7 +69,8 @@ export function Dashboard() {
   </form>;
 
   return <div className="dashboard-results">
-    <div className="dashboard-actions"><button type="button" onClick={() => load()} disabled={busy}>{busy ? "Atualizando…" : "Atualizar"}</button><button type="button" onClick={() => { setKey(""); setStats(null); }}>Sair</button></div>
+    <div className="dashboard-actions"><button type="button" onClick={() => load()} disabled={busy}>{busy ? "Atualizando…" : "Atualizar"}</button><button type="button" onClick={() => { sessionStorage.removeItem(sessionKey); setKey(""); setStats(null); }}>Sair</button></div>
+    <p className="dashboard-note">Atualização automática a cada 30 segundos enquanto esta aba estiver aberta.</p>
     {error && <p role="alert" className="dashboard-error">{error}</p>}
     <div className="dashboard-periods">{([ ["Últimas 24 horas", stats.lastDay], ["Últimos 7 dias", stats.lastWeek] ] as const).map(([label, values]) => <section className="dashboard-period" key={label}>
       <h2>{label}</h2>

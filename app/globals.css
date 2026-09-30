@@ -446,3 +446,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .reseller-panel-link { display: flex; align-items: center; justify-content: center; min-height: 51px; margin: 10px 0; border: 1px solid #ccc; border-radius: 10px; font-weight: 750; }
 .reseller-panel-link:hover { background: #eee; }
 @media (max-width: 700px) { .reseller-form-card { margin: 27px 0; } }
+
+.reseller-signup-form .reseller-label-line { display: flex; align-items: baseline; gap: 6px; color: #1b1b20; font-size: 15px; font-weight: 750; }
+.reseller-signup-form .reseller-label-line small { color: #696970; font-size: 13px; }
+.reseller-signup-form input[name="password"]::placeholder { font-size: 15px; }
+.reseller-next { max-width: 660px; padding: 22px 25px; border: 1px solid #38383f; border-radius: 15px; background: #19191d; }
+.reseller-next h2 { margin: 0 0 7px; font-size: 20px; }
+.reseller-next p { margin: 0; color: #d1d1d8; font-size: 15px; line-height: 1.55; }

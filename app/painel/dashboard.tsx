@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 type Counts = { created: number; failed: number; pending: number };
 type Trial = { id: string; username: string | null; status: string; failure_code: string | null; created_at: number };
-type Stats = { lastDay: Counts; lastWeek: Counts; history: Trial[]; reasons: { failure_code: string | null; total: number }[] };
+type Stats = { today: Counts; lastDay: Counts; lastWeek: Counts; history: Trial[]; reasons: { failure_code: string | null; total: number }[] };
 const labels: Record<string, string> = {
   CREATED: "Criado", FAILED: "Falhou", CREATING: "Sem confirmação",
   username_taken: "Usuário já existe", trial_limit: "Limite da Zappy", zappy_error: "Erro da Zappy", unconfirmed: "Resposta não confirmada",
@@ -20,6 +20,7 @@ function trialWindow(item: Trial) {
 export function Dashboard() {
   const [key, setKey] = useState("");
   const [stats, setStats] = useState<Stats | null>(null);
+  const [catalog, setCatalog] = useState<{ latest: string | null; state: "loading" | "available" | "unavailable" }>({ latest: null, state: "loading" });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [period, setPeriod] = useState("week");
@@ -73,6 +74,29 @@ export function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, period, status, search, Boolean(stats)]);
 
+  useEffect(() => {
+    if (!stats || !key) return;
+    let active = true;
+    async function checkCatalog() {
+      try {
+        const response = await fetch("/api/releases", { cache: "no-store" });
+        const body = await response.json() as { items?: { publishedAt?: string }[] };
+        if (!active) return;
+        if (!response.ok || !Array.isArray(body.items) || !body.items.length) {
+          setCatalog({ latest: null, state: "unavailable" });
+          return;
+        }
+        const dates = body.items.map(item => Date.parse(item.publishedAt ?? "")).filter(Number.isFinite);
+        setCatalog({ latest: dates.length ? new Date(Math.max(...dates)).toISOString() : null, state: "available" });
+      } catch { if (active) setCatalog({ latest: null, state: "unavailable" }); }
+    }
+    void checkCatalog();
+    const timer = window.setInterval(() => { if (!document.hidden) void checkCatalog(); }, 5 * 60 * 1000);
+    return () => { active = false; window.clearInterval(timer); };
+    // A consulta do catálogo não depende dos filtros do histórico.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [Boolean(stats), key]);
+
   if (restoring) return <p className="dashboard-note">Carregando painel…</p>;
   if (!stats) return <form className="dashboard-login" onSubmit={load}>
     <label htmlFor="dashboard-key">Chave do painel</label>
@@ -81,12 +105,29 @@ export function Dashboard() {
     <button disabled={busy} type="submit">{busy ? "Carregando…" : "Entrar"}</button>
   </form>;
 
+  const catalogIsOld = catalog.latest ? Date.now() - Date.parse(catalog.latest) > 2 * 86400000 : false;
   const pendingItems = !search && status === "all" ? stats.history.filter(item => item.status === "CREATING") : [];
 
   return <div className="dashboard-results">
     <div className="dashboard-actions"><button type="button" onClick={() => load()} disabled={busy}>{busy ? "Atualizando…" : "Atualizar"}</button><button type="button" onClick={() => { sessionStorage.removeItem(sessionKey); setKey(""); setStats(null); }}>Sair</button></div>
     <p className="dashboard-note">Atualização automática a cada 30 segundos enquanto esta aba estiver aberta.</p>
     {error && <p role="alert" className="dashboard-error">{error}</p>}
+    <section className="dashboard-history" aria-labelledby="today-heading">
+      <h2 id="today-heading">Resumo de hoje</h2>
+      <p className="dashboard-note">Desde 00h, horário de Brasília. São solicitações feitas por este site.</p>
+      <dl className="dashboard-today">
+        <div><dt>Testes criados</dt><dd>{stats.today.created}</dd></div>
+        <div><dt>Falharam</dt><dd>{stats.today.failed}</dd></div>
+        <div><dt>Sem confirmação</dt><dd>{stats.today.pending}</dd></div>
+      </dl>
+    </section>
+    <section className="dashboard-history" aria-labelledby="catalog-heading">
+      <h2 id="catalog-heading">Catálogo da Zappy</h2>
+      {catalog.state === "loading" ? <p className="dashboard-note">Consultando catálogo…</p>
+        : catalog.state === "unavailable" ? <p role="status" className="dashboard-error">Não foi possível consultar o catálogo agora.</p>
+        : catalog.latest ? <p className={catalogIsOld ? "dashboard-error" : "dashboard-note"} role={catalogIsOld ? "status" : undefined}>Última publicação recebida: <strong>{new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" }).format(new Date(catalog.latest))}</strong>. {catalogIsOld ? "Sem títulos publicados nos últimos dois dias nesta resposta da API." : "Há publicação recente na resposta da API."}</p>
+        : <p className="dashboard-note">A API não informou a data de publicação dos títulos.</p>}
+    </section>
     <div className="dashboard-periods">{([ ["Últimas 24 horas", stats.lastDay], ["Últimos 7 dias", stats.lastWeek] ] as const).map(([label, values]) => <section className="dashboard-period" key={label}>
       <h2>{label}</h2>
       <dl><div><dt>Criados</dt><dd>{values.created}</dd></div><div><dt>Falharam</dt><dd>{values.failed}</dd></div><div><dt>Sem confirmação</dt><dd>{values.pending}</dd></div></dl>

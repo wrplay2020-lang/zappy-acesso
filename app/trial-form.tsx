@@ -74,15 +74,19 @@ export function TrialForm() {
       if (!response.ok) {
         if (response.status === 409 && result.code === "username_taken") {
           setUsernameTaken(true);
-          setError("Esse usuário já está em uso. Escolha outro nome e tente novamente.");
+          setError("Esse usuário já existe. Acrescente números ao nome escolhido e tente novamente.");
           usernameRef.current?.focus();
+          usernameRef.current?.select();
           return;
         }
-        throw new Error(result.error ?? "Não foi possível criar o teste.");
+        if (response.status === 403) throw new Error("A verificação expirou. Faça a verificação de segurança novamente e tente criar o teste.");
+        if (response.status === 502) throw new Error("Não foi possível confirmar o teste. Aguarde alguns minutos antes de tentar de novo para evitar um pedido duplicado.");
+        if (response.status === 429) throw new Error(result.error ?? "Limite de testes atingido. Tente novamente amanhã.");
+        throw new Error(result.error ?? "Não foi possível criar o teste. Tente novamente.");
       }
       setAccess(result);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Tente novamente mais tarde.");
+      setError(cause instanceof TypeError ? "A conexão caiu. Verifique sua internet e aguarde alguns minutos antes de tentar novamente." : cause instanceof Error ? cause.message : "Tente novamente mais tarde.");
     } finally {
       setBusy(false);
       if (siteKey && widgetIdRef.current) { window.turnstile?.reset(widgetIdRef.current); setTurnstileToken(""); }

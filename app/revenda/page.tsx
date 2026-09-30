@@ -14,7 +14,7 @@ export default function Revenda() {
       <ResellerSignupForm />
       <div className="reseller-next">
         <h2>Depois do cadastro</h2>
-        <p>Guarde seu usuário e sua senha para entrar no painel da Zappy. Sua conta começa sem créditos; quando receber créditos, você poderá criar acessos.</p>
+        <p>Guarde seu usuário e sua senha para entrar no painel da Zappy. Sua conta começa sem créditos. Para comprar créditos, fale com o responsável pela sua revenda; depois da recarga, você poderá criar acessos.</p>
       </div>
     </section>
   </main>;

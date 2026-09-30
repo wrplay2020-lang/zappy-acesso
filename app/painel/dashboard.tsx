@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 type Counts = { created: number; failed: number; pending: number; reviewed: number };
 type Trial = { id: string; username: string | null; status: string; failure_code: string | null; created_at: number; reviewed_at: number | null };
@@ -130,6 +131,7 @@ export function Dashboard() {
 
   return <div className="dashboard-results">
     <div className="dashboard-actions"><button type="button" onClick={() => load()} disabled={busy}>{busy ? "Atualizando…" : "Atualizar"}</button><button type="button" onClick={() => { sessionStorage.removeItem(sessionKey); setKey(""); setStats(null); }}>Sair</button></div>
+    <Link className="reseller-admin-entry" href="/painel/revendas">Gerenciar sub-revendas →</Link>
     <p className="dashboard-note">Atualização automática a cada 30 segundos enquanto esta aba estiver aberta.</p>
     {error && <p role="alert" className="dashboard-error">{error}</p>}
     <section className="dashboard-history" aria-labelledby="today-heading">

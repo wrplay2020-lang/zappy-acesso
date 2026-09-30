@@ -34,6 +34,10 @@ export function ReleaseShowcase() {
       <img className="release-cover" src={item.coverUrl} alt=""/>
       <span className="release-caption"><span className="release-badge">LANÇAMENTOS</span><strong>{item.title}</strong><span className="release-category">{item.categories.join(" · ")}</span><span className="release-action">Ver no Zappy ↗</span></span>
     </a>
-    {items.length > 1 && <div className="release-controls" aria-label="Escolher lançamento">{items.map((entry, index) => <button type="button" key={entry.id} aria-label={`Mostrar ${entry.title}`} aria-current={index === current ? "true" : undefined} onClick={() => setCurrent(index)}/>)}</div>}
+    {items.length > 1 && <div className="release-controls" aria-label="Navegar pelos lançamentos">
+      <button type="button" aria-label="Lançamento anterior" onClick={() => setCurrent(index => (index - 1 + items.length) % items.length)}>‹</button>
+      <span>{current + 1} de {items.length}</span>
+      <button type="button" aria-label="Próximo lançamento" onClick={() => setCurrent(index => (index + 1) % items.length)}>›</button>
+    </div>}
   </div>;
 }

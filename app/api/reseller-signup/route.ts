@@ -54,6 +54,7 @@ export async function POST(request: Request) {
     await db.prepare("INSERT INTO reseller_contacts (reseller_id, username, display_name, whatsapp, created_at) VALUES (?, ?, ?, ?, ?)")
       .bind("pending:" + id, username, displayName, whatsapp, now).run();
   } catch {
+    await db.prepare("UPDATE reseller_signup_attempts SET status = 'FAILED' WHERE id = ?").bind(id).run().catch(() => {});
     return reply({ error: "Cadastro temporariamente indisponível. Tente mais tarde." }, 503);
   }
 

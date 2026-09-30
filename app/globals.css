@@ -239,9 +239,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .release-badge { width: fit-content; padding: 6px 9px; border-radius: 5px; background: #e21d2b; font-size: 11px; font-weight: 800; letter-spacing: .08em; }
 .release-category { color: #ddd; font-size: 13px; }
 .release-action { margin-top: 5px; font-size: 14px; font-weight: 800; }
-.release-controls { position: absolute; z-index: 2; bottom: 22px; left: 25px; right: 25px; display: flex; gap: 7px; }
-.release-controls button { width: 24px; height: 6px; padding: 0; border: 0; border-radius: 8px; background: #aaa; opacity: .6; cursor: pointer; }
-.release-controls button[aria-current="true"] { width: 36px; background: #f22b3b; opacity: 1; }
+.release-controls { position: absolute; z-index: 2; bottom: 14px; left: 25px; right: 25px; display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #fff; font-size: 13px; font-weight: 800; text-shadow: 0 2px 8px #000; }
+.release-controls button { width: 40px; height: 36px; padding: 0; border: 1px solid rgba(255,255,255,.4); border-radius: 8px; background: rgba(0,0,0,.55); color: #fff; font-size: 27px; line-height: 1; cursor: pointer; }
+.release-controls button:hover { background: #c81927; }
 .promo-first { animation: poster-cycle 18s linear infinite; }
 .promo-second { animation: poster-cycle 18s linear -12s infinite; }
 .promo-third { animation: poster-cycle 18s linear -6s infinite; }

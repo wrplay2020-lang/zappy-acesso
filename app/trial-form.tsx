@@ -109,7 +109,7 @@ export function TrialForm() {
       <div className="trial-credential"><span>Senha</span><div className="password-row"><strong>{showPassword ? access.password : "•".repeat(access.password.length)}</strong><button type="button" className="password-toggle" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} aria-pressed={showPassword}>{showPassword ? "Ocultar" : "Mostrar"}</button></div></div>
     </div>
     {access.expiresAt && <div className="access-expiry"><Clock3 size={20} strokeWidth={1.9} aria-hidden="true"/><div><small>Teste válido até</small><strong>{new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(access.expiresAt))}</strong></div></div>}
-    <p className="access-save-warning"><strong>Guarde estes dados antes de sair.</strong> A senha aparece apenas nesta página; ao atualizar ou fechar, você não conseguirá vê-la aqui novamente.</p>
+    <p className="access-save-warning"><strong>Guarde seu usuário e senha antes de sair.</strong> Eles não aparecerão novamente se você fechar esta página.</p>
     <button type="button" className="access-copy" onClick={async () => { try { await navigator.clipboard.writeText(`Login: ${access.username}\nSenha: ${access.password}`); setCopied(true); setError(""); } catch { setError("Não foi possível copiar automaticamente. Toque em Mostrar e anote a senha."); } }}>{copied ? <><Check size={18} aria-hidden="true"/> Dados copiados</> : "Copiar usuário e senha"}</button>
     <button type="button" className="access-download" onClick={() => {
       const text = [

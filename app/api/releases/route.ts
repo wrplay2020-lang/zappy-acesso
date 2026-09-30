@@ -8,9 +8,10 @@ export async function GET() {
   try {
     const response = await fetch("https://onzappy.com/api/v1/reseller/catalog/recent?limit=50", {
       headers: { Authorization: `Bearer ${env.ZAPPY_API_KEY}` },
-      signal: AbortSignal.timeout(8000),
-      redirect: "error",
+      signal: AbortSignal.timeout(15000),
+      redirect: "manual",
     });
+    if (response.status >= 300 && response.status < 400) return unavailable("zappy_redirect", response.status);
     if (!response.ok) return unavailable("zappy_http_error", response.status);
     let body: { success?: boolean; data?: { items?: CatalogItem[] } };
     try { body = await response.json(); } catch { return unavailable("invalid_json"); }
@@ -26,7 +27,7 @@ export async function GET() {
     }).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt)).slice(0, 6);
     if (!items.length) return unavailable(body.data.items.length ? "items_filtered" : "catalog_empty");
     return Response.json({ items }, { headers: { "Cache-Control": "public, max-age=300" } });
-  } catch {
-    return unavailable("network_or_timeout");
+  } catch (error) {
+    return unavailable(error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError") ? "zappy_timeout" : "zappy_connection_error");
   }
 }

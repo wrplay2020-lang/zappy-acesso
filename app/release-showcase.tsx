@@ -44,6 +44,15 @@ export function ReleaseShowcase() {
     return () => window.clearInterval(timer);
   }, [items.length, paused]);
 
+  useEffect(() => {
+    if (items.length < 2 || document.hidden) return;
+    const next = items[(current + 1) % items.length];
+    if (!next?.coverUrl) return;
+    const image = new Image();
+    image.decoding = "async";
+    image.src = next.coverUrl;
+  }, [items, current]);
+
   if (!items.length) return <div className="release-fallback"><a className="promo" href="#teste" aria-label="Criar teste grátis Zappy">
     <img src="/zappy-novidades.jpg" alt="Novidades do Zappy" className="promo-image promo-first"/>
     <img src="/zappy-episodio.jpg" alt="" className="promo-image promo-second"/>
@@ -54,7 +63,7 @@ export function ReleaseShowcase() {
   const published = item.publishedAt && !Number.isNaN(Date.parse(item.publishedAt)) ? new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "America/Sao_Paulo" }).format(new Date(item.publishedAt)) : null;
   return <div className="release-showcase" aria-label="Lançamentos do Zappy" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocusCapture={() => setPaused(true)} onBlurCapture={() => setPaused(false)} onTouchStart={() => setPaused(true)} onTouchEnd={() => setPaused(false)} onTouchCancel={() => setPaused(false)}>
     <a className="release-link" href={item.url} target="_blank" rel="noopener noreferrer">
-      <img className="release-cover" src={item.coverUrl} alt="" decoding="async" fetchPriority={current === 0 ? "high" : "auto"}/>
+      <img className="release-cover" src={item.coverUrl} alt="" decoding="async" fetchPriority={current === 0 ? "high" : "auto"} onError={event => { if (!event.currentTarget.src.endsWith("/zappy-novidades.jpg")) event.currentTarget.src = "/zappy-novidades.jpg"; }}/>
       <span className="release-caption"><span className="release-badge">LANÇAMENTOS</span><strong>{item.title}</strong><span className="release-category">{item.categories.join(" · ")}{published && <>{item.categories.length ? " · " : ""}Publicado em {published}</>}</span><span className="release-action">Ver no Zappy ↗</span></span>
     </a>
   </div>;

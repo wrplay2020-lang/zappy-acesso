@@ -2,12 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 
-type Release = { id: string; title: string; synopsis: string; coverUrl: string; url: string; categories: string[] };
+type Release = { id: string; title: string; synopsis: string; coverUrl: string; url: string; categories: string[]; publishedAt?: string };
 
 export function ReleaseShowcase() {
   const [items, setItems] = useState<Release[]>([]);
   const [current, setCurrent] = useState(0);
   const [catalogUnavailable, setCatalogUnavailable] = useState(false);
+  const [paused, setPaused] = useState(false);
   const newestId = useRef<string | null>(null);
 
   useEffect(() => {
@@ -38,10 +39,10 @@ export function ReleaseShowcase() {
   }, []);
 
   useEffect(() => {
-    if (items.length < 2) return;
-    const timer = window.setInterval(() => setCurrent(index => (index + 1) % items.length), 6000);
+    if (items.length < 2 || paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = window.setInterval(() => { if (!document.hidden) setCurrent(index => (index + 1) % items.length); }, 6000);
     return () => window.clearInterval(timer);
-  }, [items.length]);
+  }, [items.length, paused]);
 
   if (!items.length) return <div className="release-fallback"><a className="promo" href="#teste" aria-label="Criar teste grátis Zappy">
     <img src="/zappy-novidades.jpg" alt="Novidades do Zappy" className="promo-image promo-first"/>
@@ -50,10 +51,11 @@ export function ReleaseShowcase() {
   </a>{catalogUnavailable && <p role="status" className="release-unavailable">Lançamentos indisponíveis no momento. Tentaremos atualizar automaticamente.</p>}</div>;
 
   const item = items[current] ?? items[0];
-  return <div className="release-showcase" aria-label="Lançamentos do Zappy">
+  const published = item.publishedAt && !Number.isNaN(Date.parse(item.publishedAt)) ? new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "America/Sao_Paulo" }).format(new Date(item.publishedAt)) : null;
+  return <div className="release-showcase" aria-label="Lançamentos do Zappy" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocusCapture={() => setPaused(true)} onBlurCapture={() => setPaused(false)} onTouchStart={() => setPaused(true)} onTouchEnd={() => setPaused(false)} onTouchCancel={() => setPaused(false)}>
     <a className="release-link" href={item.url} target="_blank" rel="noopener noreferrer">
       <img className="release-cover" src={item.coverUrl} alt="" decoding="async" fetchPriority={current === 0 ? "high" : "auto"}/>
-      <span className="release-caption"><span className="release-badge">LANÇAMENTOS</span><strong>{item.title}</strong><span className="release-category">{item.categories.join(" · ")}</span><span className="release-action">Ver no Zappy ↗</span></span>
+      <span className="release-caption"><span className="release-badge">LANÇAMENTOS</span><strong>{item.title}</strong><span className="release-category">{item.categories.join(" · ")}{published && <>{item.categories.length ? " · " : ""}Publicado em {published}</>}</span><span className="release-action">Ver no Zappy ↗</span></span>
     </a>
   </div>;
 }

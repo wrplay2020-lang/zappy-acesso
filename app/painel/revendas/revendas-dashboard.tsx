@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 type Reseller = { id: string; username: string; displayName: string; creditsBalance: number; status: string; depth: number; canCreateSubresellers: boolean; whatsapp: string; contactPending: boolean };
+type SignupAttempt = { username: string; status: string; created_at: number };
 type Transaction = { id: string; type: string; amount: number; balanceBefore: number; balanceAfter: number; createdAt: string };
 type Page = { page: number; limit: number; total: number };
 const date = (value: string) => {
@@ -15,6 +16,7 @@ export function RevendasDashboard() {
   const [ready, setReady] = useState(false);
   const [resellers, setResellers] = useState<Reseller[] | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [signupAttempts, setSignupAttempts] = useState<SignupAttempt[]>([]);
   const [pagination, setPagination] = useState<Page>({ page: 1, limit: 25, total: 0 });
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -47,6 +49,7 @@ export function RevendasDashboard() {
     try {
       const [accounts, history] = await Promise.all([request("list"), request("transactions", { page })]);
       setResellers(accounts.resellers as Reseller[]);
+      setSignupAttempts((accounts.signupAttempts as SignupAttempt[]) ?? []);
       setTransactions(history.transactions as Transaction[]);
       setPagination(history.pagination as Page);
     } catch (cause) {
@@ -101,6 +104,7 @@ export function RevendasDashboard() {
       setAmount(""); setNotes("");
       const [accounts, history] = await Promise.all([request("list"), request("transactions", { page: 1 })]);
       setResellers(accounts.resellers as Reseller[]);
+      setSignupAttempts((accounts.signupAttempts as SignupAttempt[]) ?? []);
       setTransactions(history.transactions as Transaction[]);
       setPagination(history.pagination as Page);
     } catch (cause) { setError(cause instanceof Error ? cause.message : "A Zappy não confirmou. Confira no painel antes de repetir."); }
@@ -115,6 +119,7 @@ export function RevendasDashboard() {
       await request("saveContact", { resellerId: contactId, whatsapp: contactNumber });
       const accounts = await request("list");
       setResellers(accounts.resellers as Reseller[]);
+      setSignupAttempts((accounts.signupAttempts as SignupAttempt[]) ?? []);
       setContactId(""); setContactNumber("");
       setMessage("WhatsApp salvo para contato com a revenda.");
     } catch (cause) {
@@ -168,6 +173,14 @@ export function RevendasDashboard() {
       <h2>Cadastro de novos revendedores</h2>
       <p>A pessoa cria a conta pelo site. Os cadastros novos com WhatsApp aparecem na lista acima. Ela começa com 0 créditos até você carregar.</p>
       <a className="reseller-admin-entry" href="/revenda">Ver página pública de revenda →</a>
+    </section>
+    <section className="dashboard-history">
+      <h2>Cadastros recentes</h2>
+      <p className="dashboard-note">Tentativas feitas pela página de revenda. “Sem confirmação” exige conferir o usuário na Zappy antes de repetir.</p>
+      {signupAttempts.length ? <ul className="reseller-admin-transactions-list">{signupAttempts.map((item, index) => <li key={item.username + item.created_at + index}>
+        <div className="reseller-admin-transaction-head"><strong>@{item.username}</strong><span>{date(new Date(item.created_at).toISOString())}</span></div>
+        <div className="reseller-admin-transaction-details"><span>{({ CREATED: "Conta criada", FAILED: "Cadastro falhou", CREATING: "Sem confirmação" } as Record<string, string>)[item.status] ?? item.status}</span></div>
+      </li>)}</ul> : <p>Nenhum cadastro registrado neste site.</p>}
     </section>
     <section className="dashboard-history">
       <h2>Movimentar créditos</h2>

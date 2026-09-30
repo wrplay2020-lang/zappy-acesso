@@ -341,3 +341,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .promo-image { animation: none; }
   .promo-second, .promo-third { display: none; }
 }
+
+.access-save-warning { margin: 15px 0 0 !important; padding: 11px 13px; border-radius: 10px; background: #fff5e9; color: #59411f !important; font-size: 13px !important; line-height: 1.45; }
+.access-card .access-download { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 9px; border-color: #d7d7dd; background: #fff; color: #25252b; }
+.access-card .access-download:hover { background: #f2f2f5; }
+.access-card .access-file-note { margin: 7px 0 0 !important; color: #66666d !important; font-size: 12px !important; }
+
+.dashboard-today { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 14px 0 0; }
+.dashboard-today div { padding: 13px; border: 1px solid #393940; border-radius: 10px; background: #222226; }
+.dashboard-today dt { font-size: 13px; color: #bcbcc4; }
+.dashboard-today dd { margin: 3px 0 0; font-size: 25px; font-weight: 800; }
+@media (max-width: 560px) { .dashboard-today { grid-template-columns: 1fr; } }
+
+.dashboard-history p.dashboard-error { color: #ff9aa0; }

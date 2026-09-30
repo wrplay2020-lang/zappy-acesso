@@ -499,3 +499,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .reseller-admin-contact-form button:disabled { opacity: .6; }
 .reseller-admin-list li .reseller-admin-contact { display: grid; }
 .reseller-admin-list li .reseller-admin-contact-form { display: grid; }
+
+.reseller-admin-search { display: grid; gap: 8px; margin: 18px 0; }
+.reseller-admin-search label { color: #f1f1f4; font-size: 14px; font-weight: 750; }
+.reseller-admin-search input { width: 100%; min-height: 44px; padding: 9px 12px; border: 1px solid #5c5c65; border-radius: 9px; background: #222227; color: #fff; font-size: 16px; }
+.reseller-admin-search input::placeholder { color: #a6a6b0; }
+.reseller-admin-search small { color: #a8a8b1; font-size: 12px; }

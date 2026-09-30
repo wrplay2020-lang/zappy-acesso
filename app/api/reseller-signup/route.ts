@@ -50,7 +50,11 @@ export async function POST(request: Request) {
     const pending = await db.prepare("SELECT id FROM reseller_signup_attempts WHERE username = ? AND status IN ('CREATING', 'CREATED') AND created_at > ? LIMIT 1").bind(username, now - 86400000).first<{ id: string }>();
     if (pending) return reply({ code: "signup_unconfirmed", error: "Já existe um cadastro recente com esse usuário. Confira se ele já consegue entrar antes de tentar de novo." }, 409);
     await db.prepare("INSERT INTO reseller_signup_attempts (id, ip_hash, username, status, created_at) VALUES (?, ?, ?, 'CREATING', ?)").bind(id, ipHash, username, now).run();
+    // Salve o contato antes de criar a conta externa; em caso de falha, nenhum cadastro fica sem telefone.
+    await db.prepare("INSERT INTO reseller_contacts (reseller_id, username, display_name, whatsapp, created_at) VALUES (?, ?, ?, ?, ?)")
+      .bind("pending:" + id, username, displayName, whatsapp, now).run();
   } catch {
+    await db.prepare("UPDATE reseller_signup_attempts SET status = 'FAILED' WHERE id = ?").bind(id).run().catch(() => {});
     return reply({ error: "Cadastro temporariamente indisponível. Tente mais tarde." }, 503);
   }
 
@@ -64,12 +68,16 @@ export async function POST(request: Request) {
     const body = await response.json() as { success?: boolean; data?: { resellerId?: string; username?: string }; error?: { code?: string } };
     if (!response.ok || !body.success || !body.data?.resellerId) {
       await db.prepare("UPDATE reseller_signup_attempts SET status = 'FAILED' WHERE id = ?").bind(id).run().catch(() => {});
+      await db.prepare("DELETE FROM reseller_contacts WHERE reseller_id = ?").bind("pending:" + id).run().catch(() => {});
       const taken = response.status === 409 || ["username_taken", "username_exists", "reseller_exists", "conflict"].includes(body.error?.code ?? "");
       if (taken) return reply({ code: "username_taken", error: "Esse usuário já está em uso. Escolha outro." }, 409);
       if (response.status === 429) return reply({ error: "Muitos cadastros no momento. Tente mais tarde." }, 429);
       return reply({ error: "A Zappy não conseguiu criar a conta agora. Tente mais tarde." }, 502);
     }
-    await db.prepare("INSERT OR REPLACE INTO reseller_contacts (reseller_id, username, display_name, whatsapp, created_at) VALUES (?, ?, ?, ?, ?)").bind(body.data.resellerId, body.data.username ?? username, displayName, whatsapp, now).run().catch(error => console.error("reseller_contact_save_failed", id, error));
+    // Se esta atualização falhar, o registro pendente continua disponível pela busca de usuário no painel.
+    await db.prepare("UPDATE reseller_contacts SET reseller_id = ?, username = ? WHERE reseller_id = ?")
+      .bind(body.data.resellerId, body.data.username ?? username, "pending:" + id).run()
+      .catch(error => console.error("reseller_contact_link_failed", id, error));
     await db.prepare("UPDATE reseller_signup_attempts SET status = 'CREATED' WHERE id = ?").bind(id).run().catch(() => {});
     return reply({ success: true, username: body.data.username ?? username }, 201);
   } catch {

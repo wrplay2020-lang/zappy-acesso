@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type Reseller = { id: string; username: string; displayName: string; creditsBalance: number; status: string; depth: number; canCreateSubresellers: boolean; whatsapp: string };
+type Reseller = { id: string; username: string; displayName: string; creditsBalance: number; status: string; depth: number; canCreateSubresellers: boolean; whatsapp: string; contactPending: boolean };
 type Transaction = { id: string; type: string; amount: number; balanceBefore: number; balanceAfter: number; createdAt: string };
 type Page = { page: number; limit: number; total: number };
 const savedKey = "zappy-dashboard-key";
@@ -26,6 +26,7 @@ export function RevendasDashboard() {
   const [kind, setKind] = useState<"transfer" | "recall">("transfer");
   const [contactId, setContactId] = useState("");
   const [contactNumber, setContactNumber] = useState("");
+  const [search, setSearch] = useState("");
 
   async function request(action: string, fields: Record<string, unknown> = {}, credential = key) {
     const response = await fetch("/api/admin/resellers", {
@@ -104,6 +105,10 @@ export function RevendasDashboard() {
     <button type="submit" disabled={busy}>{busy ? "Carregando…" : "Entrar"}</button>
   </form>;
 
+  const filteredResellers = resellers.filter(item =>
+    (item.displayName + " " + item.username).toLocaleLowerCase("pt-BR").includes(search.trim().toLocaleLowerCase("pt-BR"))
+  );
+
   return <div className="dashboard-results">
     <div className="dashboard-actions"><button type="button" disabled={busy} onClick={() => void load(key, pagination.page)}>Atualizar</button><button type="button" onClick={() => { sessionStorage.removeItem(savedKey); setKey(""); setResellers(null); setTransactions([]); }}>Sair</button></div>
     {error && <p role="alert" className="dashboard-error">{error}</p>}
@@ -111,14 +116,15 @@ export function RevendasDashboard() {
     <section className="dashboard-history">
       <h2>Suas sub-revendas ({resellers.length})</h2>
       <p className="dashboard-note">Saldos informados pela API da Zappy. Contas novas começam com 0 créditos.</p>
-      {resellers.length ? <ul className="reseller-admin-list">{resellers.map(item => <li key={item.id}>
+      {resellers.length > 0 && <div className="reseller-admin-search"><label htmlFor="reseller-search">Buscar revenda</label><input id="reseller-search" type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Nome ou usuário" autoComplete="off" /><small>{filteredResellers.length} de {resellers.length} revenda(s)</small></div>}
+      {filteredResellers.length ? <ul className="reseller-admin-list">{filteredResellers.map(item => <li key={item.id}>
         <div>
           <strong>{item.displayName}</strong>
           <span>@{item.username} · {item.status} · nível {item.depth}</span>
           <b>{item.creditsBalance} crédito(s)</b>
           <div className="reseller-admin-contact">
             {item.whatsapp ? <>
-              <small>WhatsApp: {item.whatsapp}</small>
+              <small>WhatsApp: {item.whatsapp}{item.contactPending && <span className="reseller-contact-pending"> · vínculo pendente de confirmação</span>}</small>
               <a className="reseller-admin-whatsapp" href={"https://wa.me/" + (item.whatsapp.length <= 11 ? "55" + item.whatsapp : item.whatsapp)} target="_blank" rel="noopener noreferrer" aria-label={"Conversar com " + item.displayName + " no WhatsApp"}>Conversar ↗</a>
             </> : <small>WhatsApp não informado</small>}
             <button type="button" onClick={() => { setContactId(item.id); setContactNumber(item.whatsapp ?? ""); }}> {item.whatsapp ? "Editar número" : "Adicionar número"}</button>
@@ -129,7 +135,7 @@ export function RevendasDashboard() {
             <button type="submit" disabled={busy}>{busy ? "Salvando..." : "Salvar WhatsApp"}</button>
           </form>}
         </div>
-      </li>)}</ul> : <p>Nenhuma sub-revenda encontrada.</p>}
+      </li>)}</ul> : <p>{resellers.length ? "Nenhuma revenda corresponde à busca." : "Nenhuma sub-revenda encontrada."}</p>}
     </section>
     <section className="dashboard-history">
       <h2>Cadastro de novos revendedores</h2>

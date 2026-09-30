@@ -24,6 +24,8 @@ export function RevendasDashboard() {
   const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
   const [kind, setKind] = useState<"transfer" | "recall">("transfer");
+  const [contactId, setContactId] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
 
   async function request(action: string, fields: Record<string, unknown> = {}, credential = key) {
     const response = await fetch("/api/admin/resellers", {
@@ -79,6 +81,21 @@ export function RevendasDashboard() {
     finally { setBusy(false); }
   }
 
+  async function saveContact(event: React.FormEvent) {
+    event.preventDefault();
+    if (busy || !contactId) return;
+    setBusy(true); setError(""); setMessage("");
+    try {
+      await request("saveContact", { resellerId: contactId, whatsapp: contactNumber });
+      const accounts = await request("list");
+      setResellers(accounts.resellers as Reseller[]);
+      setContactId(""); setContactNumber("");
+      setMessage("WhatsApp salvo para contato com a revenda.");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Não foi possível salvar o WhatsApp.");
+    } finally { setBusy(false); }
+  }
+
   if (!ready) return <p className="dashboard-note">Carregando…</p>;
   if (!resellers) return <form className="dashboard-login" onSubmit={event => { event.preventDefault(); void load(key); }}>
     <label htmlFor="reseller-key">Chave do painel</label>
@@ -94,7 +111,25 @@ export function RevendasDashboard() {
     <section className="dashboard-history">
       <h2>Suas sub-revendas ({resellers.length})</h2>
       <p className="dashboard-note">Saldos informados pela API da Zappy. Contas novas começam com 0 créditos.</p>
-      {resellers.length ? <ul className="reseller-admin-list">{resellers.map(item => <li key={item.id}><div><strong>{item.displayName}</strong><span>@{item.username} · {item.status} · nível {item.depth}</span>{item.whatsapp && <a className="reseller-admin-whatsapp" href={"https://wa.me/" + (item.whatsapp.length <= 11 ? "55" + item.whatsapp : item.whatsapp)} target="_blank" rel="noopener noreferrer" aria-label={"Conversar com " + item.displayName + " no WhatsApp"}>Conversar no WhatsApp ↗</a>}</div><b>{item.creditsBalance} crédito(s)</b></li>)}</ul> : <p>Nenhuma sub-revenda encontrada.</p>}
+      {resellers.length ? <ul className="reseller-admin-list">{resellers.map(item => <li key={item.id}>
+        <div>
+          <strong>{item.displayName}</strong>
+          <span>@{item.username} · {item.status} · nível {item.depth}</span>
+          <b>{item.creditsBalance} crédito(s)</b>
+          <div className="reseller-admin-contact">
+            {item.whatsapp ? <>
+              <small>WhatsApp: {item.whatsapp}</small>
+              <a className="reseller-admin-whatsapp" href={"https://wa.me/" + (item.whatsapp.length <= 11 ? "55" + item.whatsapp : item.whatsapp)} target="_blank" rel="noopener noreferrer" aria-label={"Conversar com " + item.displayName + " no WhatsApp"}>Conversar ↗</a>
+            </> : <small>WhatsApp não informado</small>}
+            <button type="button" onClick={() => { setContactId(item.id); setContactNumber(item.whatsapp ?? ""); }}> {item.whatsapp ? "Editar número" : "Adicionar número"}</button>
+          </div>
+          {contactId === item.id && <form className="reseller-admin-contact-form" onSubmit={saveContact}>
+            <label htmlFor={"contact-" + item.id}>WhatsApp com DDD</label>
+            <input id={"contact-" + item.id} type="tel" inputMode="tel" value={contactNumber} onChange={event => setContactNumber(event.target.value)} placeholder="11999999999" required />
+            <button type="submit" disabled={busy}>{busy ? "Salvando..." : "Salvar WhatsApp"}</button>
+          </form>}
+        </div>
+      </li>)}</ul> : <p>Nenhuma sub-revenda encontrada.</p>}
     </section>
     <section className="dashboard-history">
       <h2>Cadastro de novos revendedores</h2>

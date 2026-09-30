@@ -60,10 +60,10 @@ export function ReleaseShowcase() {
   </a>{catalogUnavailable && <p role="status" className="release-unavailable">Lançamentos indisponíveis no momento. Tentaremos atualizar automaticamente.</p>}</div>;
 
   const item = items[current] ?? items[0];
-  return <div className="release-showcase" aria-label="Lançamentos do Zappy" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocusCapture={() => setPaused(true)} onBlurCapture={() => setPaused(false)} onTouchStart={() => setPaused(true)} onTouchEnd={() => setPaused(false)} onTouchCancel={() => setPaused(false)}>
+  return <div className="release-showcase" aria-label="Catálogo do Zappy" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocusCapture={() => setPaused(true)} onBlurCapture={() => setPaused(false)} onTouchStart={() => setPaused(true)} onTouchEnd={() => setPaused(false)} onTouchCancel={() => setPaused(false)}>
     <a className="release-link" href={item.url} target="_blank" rel="noopener noreferrer">
       <img className="release-cover" src={item.coverUrl} alt="" decoding="async" fetchPriority={current === 0 ? "high" : "auto"} onError={event => { if (!event.currentTarget.src.endsWith("/zappy-novidades.jpg")) event.currentTarget.src = "/zappy-novidades.jpg"; }}/>
-      <span className="release-caption"><span className="release-badge">LANÇAMENTOS</span><strong>{item.title}</strong><span className="release-category">{item.categories.join(" · ")}</span><span className="release-action">Ver no Zappy ↗</span></span>
+      <span className="release-caption"><span className="release-badge">CATÁLOGO ZAPPY</span><strong>{item.title}</strong><span className="release-category">{item.categories.join(" · ")}{item.publishedAt && !Number.isNaN(Date.parse(item.publishedAt)) ? ` · Publicado em ${new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "short", year: "numeric" }).format(new Date(item.publishedAt))}` : ""}</span><span className="release-action">Ver no Zappy ↗</span></span>
     </a>
   </div>;
 }

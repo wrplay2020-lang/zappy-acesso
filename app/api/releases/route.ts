@@ -26,6 +26,7 @@ export async function GET() {
       } catch { return []; }
     });
     if (!items.length) return unavailable(body.data.items.length ? "items_filtered" : "catalog_empty");
+    items.sort((a, b) => (Date.parse(b.publishedAt) || 0) - (Date.parse(a.publishedAt) || 0));
     return Response.json({ items }, { headers: { "Cache-Control": "public, max-age=300" } });
   } catch (error) {
     return unavailable(error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError") ? "zappy_timeout" : "zappy_connection_error");

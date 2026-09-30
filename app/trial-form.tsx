@@ -89,18 +89,23 @@ export function TrialForm() {
     }
   }
 
-  if (access) return <div className="trial-card" id="teste">
-    <p className="card-eyebrow">TUDO PRONTO</p><h2>Seu acesso está criado</h2>
-    <p>Use estes dados para entrar no Zappy. Guarde o login e a senha em um lugar seguro.</p>
+  if (access) return <div className="trial-card access-card" id="teste">
+    <p className="card-eyebrow">TUDO PRONTO</p><h2>Seu teste está ativo</h2>
+    <p>Guarde estes dados. Você vai usá-los para entrar no Zappy.</p>
     <div className="trial-credential"><span>Usuário</span><strong>{access.username}</strong></div>
     <div className="trial-credential"><span>Senha</span><div className="password-row"><strong>{showPassword ? access.password : "•".repeat(access.password.length)}</strong><button type="button" className="password-toggle" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} aria-pressed={showPassword}>{showPassword ? "Ocultar" : "Mostrar"}</button></div></div>
     {access.expiresAt && <p className="trial-expiry">Teste válido até {new Date(access.expiresAt).toLocaleString("pt-BR")}.</p>}
-    <button type="button" onClick={async () => { await navigator.clipboard.writeText(`Login: ${access.username}\nSenha: ${access.password}`); setCopied(true); }}>{copied ? "Dados copiados" : "Copiar login e senha"}</button>
-    <p className="access-heading">Agora escolha onde assistir:</p>
-    <ol className="first-steps"><li>Copie e guarde seu login e senha.</li><li>Escolha abaixo o seu aparelho.</li><li>Entre no Zappy com esses dados e aproveite as 24 horas.</li></ol>
-    <a href={access.android} target="_blank" rel="noopener noreferrer"><span className="access-label"><YellowRobot/> Android · Baixar aplicativo</span></a>
-    <a href={access.login} target="_blank" rel="noopener noreferrer">🌐 Navegador · Entrar online</a>
-    <a href="https://onzappy.com" target="_blank" rel="noopener noreferrer">🍎 iPhone · Abrir no Safari</a>
+    <button type="button" onClick={async () => { try { await navigator.clipboard.writeText(`Login: ${access.username}\nSenha: ${access.password}`); setCopied(true); setError(""); } catch { setError("Não foi possível copiar automaticamente. Toque em Mostrar e anote a senha."); } }}>{copied ? "✓ Login e senha copiados" : "Copiar login e senha"}</button>
+    {error && <p className="trial-error" role="alert">{error}</p>}
+    <div className="access-guide">
+      <h3>Como começar a assistir</h3>
+      <ol className="first-steps"><li>Copie seu login e sua senha acima.</li><li>Abra o Zappy em uma das opções abaixo.</li><li>Na tela de entrada, digite o usuário e a senha do teste.</li></ol>
+    </div>
+    <div className="access-destinations">
+      <a href={access.login} target="_blank" rel="noopener noreferrer">🌐 Entrar pelo navegador <span aria-hidden="true">↗</span></a>
+      <a href={access.android} target="_blank" rel="noopener noreferrer"><span className="access-label"><YellowRobot/> Baixar app Android</span><span aria-hidden="true">↗</span></a>
+      <a href="https://onzappy.com" target="_blank" rel="noopener noreferrer">🍎 Abrir no iPhone <span aria-hidden="true">↗</span></a>
+    </div>
   </div>;
   return <><div className="trial-card" id="teste">
     <p className="card-eyebrow">COMECE AGORA</p><h2>Crie seu acesso</h2>

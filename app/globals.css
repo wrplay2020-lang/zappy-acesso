@@ -367,3 +367,21 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .dashboard-review-button:disabled { opacity: .6; cursor: wait; }
 .dashboard-status-reviewed { color: #d8c5ff; background: #3a2d53; }
 .dashboard-mobile-card > .dashboard-review-button { margin-top: 12px; }
+
+.reseller-admin-success { padding: 12px; border-radius: 9px; background: #153c28; color: #c1f4d3; }
+.reseller-admin-list { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; }
+.reseller-admin-list li { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 13px; border: 1px solid #393940; border-radius: 9px; background: #222226; }
+.reseller-admin-list li div { display: grid; gap: 3px; min-width: 0; overflow-wrap: anywhere; }
+.reseller-admin-list li span { color: #d1d1d8; font-size: 12px; }
+.reseller-admin-list li b { flex: none; font-size: 14px; }
+.reseller-admin-form { display: grid; gap: 13px; }
+.reseller-admin-form label { display: grid; gap: 6px; font-size: 13px; font-weight: 700; }
+.reseller-admin-form input, .reseller-admin-form select { width: 100%; min-height: 45px; padding: 9px 11px; border: 1px solid #686871; border-radius: 8px; background: #222228; color: #fff; }
+.reseller-admin-form button { min-height: 46px; padding: 10px 16px; border: 1px solid #dc1b2b; border-radius: 9px; background: #df1424; color: #fff; font-weight: 800; cursor: pointer; }
+.reseller-admin-form button:disabled { opacity: .6; cursor: wait; }
+.reseller-admin-transactions { display: block; }
+.reseller-admin-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 15px; color: #d1d1d8; font-size: 13px; }
+.reseller-admin-pagination button { padding: 8px 12px; border: 1px solid #55555d; border-radius: 8px; background: #303036; color: #fff; cursor: pointer; }
+.reseller-admin-pagination button:disabled { opacity: .45; cursor: default; }
+.reseller-admin-entry { display: inline-block; margin: 10px 0 0; padding: 11px 14px; border: 1px solid #55555d; border-radius: 9px; color: #f3f3f5; font-weight: 750; }
+.reseller-admin-entry:hover { background: #303036; }

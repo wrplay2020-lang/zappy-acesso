@@ -354,3 +354,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 @media (max-width: 560px) { .dashboard-today { grid-template-columns: 1fr; } }
 
 .dashboard-history p.dashboard-error { color: #ff9aa0; }
+
+.dashboard-review-button { margin: 5px 4px; padding: 8px 10px; border: 1px solid #5c5c66; border-radius: 8px; background: #303038; color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; }
+.dashboard-review-button:hover { background: #44444d; }
+.dashboard-review-button:disabled { opacity: .6; cursor: wait; }
+.dashboard-status-reviewed { color: #d8c5ff; background: #3a2d53; }
+.dashboard-mobile-card > .dashboard-review-button { margin-top: 12px; }

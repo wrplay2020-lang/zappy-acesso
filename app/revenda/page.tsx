@@ -12,13 +12,9 @@ export default function Revenda() {
       <h1 id="reseller-title">Venda novelinhas com a <em>Zappy.</em></h1>
       <p className="reseller-intro">Crie sua conta de revendedor aqui. Depois do cadastro, você poderá entrar no painel da Zappy.</p>
       <ResellerSignupForm />
-      <div className="reseller-steps">
-        <h2>Como funciona</h2>
-        <ol>
-          <li><strong>Crie sua conta</strong><span>Escolha o nome da revenda, o usuário e a senha nesta página.</span></li>
-          <li><strong>Entre no painel</strong><span>Guarde seus dados e acesse o painel de revendedor da Zappy.</span></li>
-          <li><strong>Receba créditos</strong><span>A conta começa com zero créditos. Você poderá criar acessos depois que receber créditos.</span></li>
-        </ol>
+      <div className="reseller-next">
+        <h2>Depois do cadastro</h2>
+        <p>Guarde seu usuário e sua senha para entrar no painel da Zappy. Sua conta começa sem créditos; quando receber créditos, você poderá criar acessos.</p>
       </div>
     </section>
   </main>;

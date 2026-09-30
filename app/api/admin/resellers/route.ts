@@ -2,7 +2,7 @@ import { env } from "cloudflare:workers";
 
 const base = "https://onzappy.com/api/v1/reseller";
 const headers = { "Cache-Control": "no-store" };
-type Input = { action?: unknown; page?: unknown; resellerId?: unknown; amount?: unknown; notes?: unknown; confirmation?: unknown };
+type Input = { action?: unknown; page?: unknown; resellerId?: unknown; amount?: unknown; notes?: unknown; confirmation?: unknown; whatsapp?: unknown };
 
 async function authorized(request: Request) {
   if (!env.ADMIN_DASHBOARD_KEY || !env.ZAPPY_API_KEY) return "Painel ainda não configurado.";
@@ -54,6 +54,20 @@ export async function POST(request: Request) {
         whatsapp: contacts.get(String(item.id ?? "")) ?? (typeof item.whatsapp === "string" && /^\d{10,15}$/.test(item.whatsapp) ? item.whatsapp : ""),
       }));
       return Response.json({ resellers }, { headers });
+    }
+    if (action === "saveContact") {
+      const resellerId = String(input.resellerId ?? "").trim();
+      const whatsapp = String(input.whatsapp ?? "").replace(/\D/g, "");
+      if (!env.DB || !/^[a-zA-Z0-9_-]{6,100}$/.test(resellerId) || !/^\d{10,15}$/.test(whatsapp)) {
+        return Response.json({ error: "Informe um WhatsApp com DDD válido." }, { status: 400, headers });
+      }
+      const list = await zappy("/resellers") as { resellers?: { id?: string; username?: string; displayName?: string }[] };
+      const reseller = list.resellers?.find(item => item.id === resellerId);
+      if (!reseller) return Response.json({ error: "Esta sub-revenda não consta na sua lista." }, { status: 400, headers });
+      await env.DB.prepare("CREATE TABLE IF NOT EXISTS reseller_contacts (reseller_id TEXT PRIMARY KEY, username TEXT NOT NULL, display_name TEXT NOT NULL, whatsapp TEXT NOT NULL, created_at INTEGER NOT NULL)").run();
+      await env.DB.prepare("INSERT INTO reseller_contacts (reseller_id, username, display_name, whatsapp, created_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(reseller_id) DO UPDATE SET whatsapp = excluded.whatsapp")
+        .bind(resellerId, String(reseller.username ?? ""), String(reseller.displayName ?? ""), whatsapp, Date.now()).run();
+      return Response.json({ success: true }, { headers });
     }
     if (action === "transactions") {
       const page = Number(input.page ?? 1);

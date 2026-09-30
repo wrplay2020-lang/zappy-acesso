@@ -110,7 +110,7 @@ export function ResellerSignupForm() {
     <button className="reseller-submit" type="button" onClick={copy}><Copy size={19}/> {copied ? "Dados copiados" : "Copiar usuário e senha"}</button>
     <a className="reseller-panel-link" href="https://onzappy.com/login" target="_blank" rel="noopener noreferrer">Entrar no painel da Zappy ↗</a>
     {error && <p className="reseller-error" role="alert">{error}</p>}
-    <p className="reseller-note">A conta começa com zero créditos. Para criar acessos, aguarde receber créditos.</p>
+    <p className="reseller-note">A conta começa com zero créditos. Para comprar créditos, fale com o responsável pela sua revenda.</p>
   </section>;
 
   return <section className="reseller-form-card" aria-labelledby="reseller-form-title">
@@ -121,7 +121,7 @@ export function ResellerSignupForm() {
       <label>Nome comercial<input name="displayName" required minLength={3} maxLength={90} autoComplete="organization" placeholder="Nome da sua revenda" /></label>
       <label>Usuário<input ref={usernameRef} name="username" required minLength={4} maxLength={32} pattern="[A-Za-z0-9_]{4,32}" autoCapitalize="none" autoCorrect="off" autoComplete="username" placeholder="sua_revenda" /><small>4 a 32 letras, números ou _; sem espaços e acentos.</small></label>
       <label>Senha<input name="password" required minLength={6} maxLength={100} type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder="Crie uma senha" /><button className="reseller-show" type="button" onClick={() => setShowPassword(value => !value)}>{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>} {showPassword ? "Ocultar" : "Mostrar"}</button><small>Mínimo de 6 caracteres.</small></label>
-      <label><span className="reseller-label-line">WhatsApp <small>(opcional)</small></span><input name="whatsapp" type="tel" inputMode="tel" autoComplete="tel" placeholder="DDD + número" /></label>
+      <label>WhatsApp para contato<input name="whatsapp" required type="tel" inputMode="tel" autoComplete="tel" placeholder="DDD + número" /><small>Obrigatório para combinar a recarga dos créditos.</small></label>
       <div ref={widgetRef} className="reseller-turnstile" aria-label="Verificação de segurança" />
       {securityError && <p className="reseller-error" role="alert">{securityError}</p>}
       {error && <p className="reseller-error" role="alert">{error}</p>}

@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   if (displayName.length < 3 || displayName.length > 90) return reply({ error: "Informe o nome comercial (3 a 90 caracteres)." }, 400);
   if (!/^[a-z0-9_]{4,32}$/.test(username)) return reply({ error: "O usuário deve ter de 4 a 32 letras, números ou _." }, 400);
   if (password.length < 6 || password.length > 100) return reply({ error: "A senha deve ter de 6 a 100 caracteres." }, 400);
-  if (whatsapp && !/^\d{10,15}$/.test(whatsapp)) return reply({ error: "Informe um WhatsApp com DDD válido." }, 400);
+  if (!/^\d{10,15}$/.test(whatsapp)) return reply({ error: "Informe seu WhatsApp com DDD para combinar a recarga de créditos." }, 400);
   const ip = request.headers.get("CF-Connecting-IP");
   if (!ip) return reply({ error: "Não foi possível verificar a solicitação. Tente novamente." }, 403);
   const token = typeof input.turnstileToken === "string" ? input.turnstileToken : "";
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     const response = await fetch("https://onzappy.com/api/v1/reseller/resellers", {
       method: "POST",
       headers: { Authorization: "Bearer " + env.ZAPPY_API_KEY, "Content-Type": "application/json", "Idempotency-Key": id },
-      body: JSON.stringify({ username, password, displayName, ...(whatsapp ? { whatsapp } : {}) }),
+      body: JSON.stringify({ username, password, displayName, whatsapp }),
       signal: AbortSignal.timeout(12000),
     });
     const body = await response.json() as { success?: boolean; data?: { resellerId?: string; username?: string }; error?: { code?: string } };

@@ -32,5 +32,11 @@ export default function Home() {
         <details><summary>O que acontece depois das 24 horas?</summary><p>O acesso de teste termina. Se gostar, você pode adicionar 30 dias por R$ 20 via Pix dentro do aplicativo.</p></details>
       </div>
     </section>
+    <section className="reseller-invite" aria-labelledby="reseller-invite-title">
+      <p className="eyebrow">PARA REVENDEDORES</p>
+      <h2 id="reseller-invite-title">Quer revender Zappy?</h2>
+      <p>Crie sua própria conta de sub-revenda pelo convite da Zappy.</p>
+      <Link href="/revenda" className="reseller-invite-link">Conhecer a revenda →</Link>
+    </section>
   </main>;
 }

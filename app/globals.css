@@ -143,11 +143,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .access-credentials .trial-credential + .trial-credential { border-top: 1px solid #ededf0; }
 .access-credentials .trial-credential strong { font-size: 16px; }
 .access-expiry { display: flex; align-items: center; gap: 10px; margin-top: 13px; padding: 10px 13px; border-radius: 10px; background: #f5f5f7; color: #36363d; }
-.access-expiry > span { color: #c81927; font-size: 23px; line-height: 1; }
+.access-expiry > svg { flex: none; color: #c81927; }
 .access-expiry div { display: grid; gap: 2px; }
 .access-expiry small { display: block; color: #64646c; font-size: 11px; font-weight: 700; }
 .access-expiry strong { font-size: 14px; }
-.access-card .access-copy { margin-top: 15px; }
+.access-card .access-copy { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 15px; }
 .access-next { margin-top: 24px; padding-top: 20px; border-top: 1px solid #e6e6e9; }
 .access-next h3 { margin: 0 0 5px; font-size: 17px; letter-spacing: -.02em; }
 .access-next p { margin: 0; color: #62626b; font-size: 13px; line-height: 1.45; }
@@ -156,7 +156,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .access-destinations a:first-child { border-color: #d61524; background: #df1424; color: #fff; }
 .access-destinations a:hover { border-color: #a9a9b2; background: #f6f6f8; }
 .access-destinations a:first-child:hover { background: #bd0f1c; color: #fff; }
-.access-destinations a > span:last-child { flex: none; }
+.access-link-label { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
+.access-platform-icon { display: grid; flex: none; place-items: center; width: 31px; height: 31px; border-radius: 8px; background: #fff0f1; color: #c81927; }
+.access-destinations a:first-child .access-platform-icon { background: rgba(255,255,255,.16); color: #fff; }
+.access-link-arrow { flex: none; opacity: .75; }
+.platform-links svg { flex: none; color: #ff6670; }
 .turnstile-container { margin-top: 16px; min-height: 65px; }
 .trial-card > a {
   display: flex;

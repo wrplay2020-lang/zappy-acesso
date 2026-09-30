@@ -3,11 +3,11 @@ import { ResellerSignupForm } from "./reseller-signup-form";
 export default function Revenda() {
   return <main className="site reseller-page">
     <header className="topbar">
-      <a href="/" className="logo" aria-label="Zappy, voltar ao início"><span className="logo-z">Z</span> Zappy</a>
-      <a href="/" className="login-link">Voltar ao site</a>
+      <a href="/" target="_top" className="logo" aria-label="Zappy, voltar ao início"><span className="logo-z">Z</span> Zappy</a>
+      <a href="/" target="_top" className="login-link">Voltar ao site</a>
     </header>
     <nav className="audience-nav" aria-label="Escolha seu acesso">
-      <a href="/" className="audience-link">Para assistir</a>
+      <a href="/" target="_top" className="audience-link">Para assistir</a>
       <span className="audience-current" aria-current="page">Para revender</span>
     </nav>
     <section className="reseller-content" aria-labelledby="reseller-title">

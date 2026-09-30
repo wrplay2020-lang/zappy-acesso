@@ -26,6 +26,7 @@ export function RevendasDashboard() {
   const [contactId, setContactId] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   async function request(action: string, fields: Record<string, unknown> = {}, _credential = "") {
     const response = await fetch("/api/admin/resellers", {
@@ -130,8 +131,10 @@ export function RevendasDashboard() {
   </form>;
 
   const filteredResellers = resellers.filter(item =>
+    (statusFilter === "all" || item.status === statusFilter) &&
     (item.displayName + " " + item.username).toLocaleLowerCase("pt-BR").includes(search.trim().toLocaleLowerCase("pt-BR"))
   );
+  const availableStatuses = [...new Set(resellers.map(item => item.status))].sort();
 
   return <div className="dashboard-results">
     <div className="dashboard-actions"><button type="button" disabled={busy} onClick={() => void load(key, pagination.page)}>Atualizar</button><button type="button" onClick={() => void logout()}>Sair</button></div>
@@ -140,7 +143,7 @@ export function RevendasDashboard() {
     <section className="dashboard-history">
       <h2>Suas sub-revendas ({resellers.length})</h2>
       <p className="dashboard-note">Saldos informados pela API da Zappy. Contas novas começam com 0 créditos.</p>
-      {resellers.length > 0 && <div className="reseller-admin-search"><label htmlFor="reseller-search">Buscar revenda</label><input id="reseller-search" type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Nome ou usuário" autoComplete="off" /><small>{filteredResellers.length} de {resellers.length} revenda(s)</small></div>}
+      {resellers.length > 0 && <div className="reseller-admin-search"><label htmlFor="reseller-search">Buscar revenda</label><input id="reseller-search" type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Nome ou usuário" autoComplete="off" /><label htmlFor="reseller-status">Situação</label><select id="reseller-status" value={statusFilter} onChange={event => setStatusFilter(event.target.value)}><option value="all">Todas</option>{availableStatuses.map(value => <option key={value} value={value}>{value === "ACTIVE" ? "Ativas" : value}</option>)}</select><small>{filteredResellers.length} de {resellers.length} revenda(s)</small></div>}
       {filteredResellers.length ? <ul className="reseller-admin-list">{filteredResellers.map(item => <li key={item.id}>
         <div>
           <strong>{item.displayName}</strong>

@@ -133,11 +133,26 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .trial-card .access-heading { margin: 19px 0 8px; color: #2b2b31; font-size: 14px; font-weight: 800; }
 .first-steps { margin: 0 0 15px; padding-left: 20px; color: #55555d; font-size: 13px; line-height: 1.55; }
 .first-steps li { padding-left: 3px; margin: 5px 0; }
-.access-guide { margin-top: 22px; padding: 16px 17px; border: 1px solid #e5e5e9; border-radius: 12px; background: #f6f6f8; }
-.access-guide h3 { margin: 0 0 8px; font-size: 16px; line-height: 1.3; }
-.access-guide .first-steps { margin-bottom: 0; }
-.access-destinations { display: grid; gap: 9px; margin-top: 15px; }
-.access-destinations a { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 49px; padding: 10px 13px; border: 1px solid #dedee3; border-radius: 10px; background: #fff; color: #222228; font-size: 14px; font-weight: 750; }
+.access-card { border-top: 4px solid #df1424; }
+.access-success-head { display: flex; align-items: center; gap: 13px; margin-bottom: 12px; }
+.access-check { display: grid; flex: none; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: #e6f6eb; color: #168148; font-size: 22px; font-weight: 850; }
+.access-success-head h2 { margin: 3px 0 0; font-size: 23px; }
+.access-card > .access-lead { margin-bottom: 17px !important; }
+.access-credentials { overflow: hidden; border: 1px solid #dedee4; border-radius: 12px; background: #fff; }
+.access-credentials .trial-credential { margin: 0; padding: 12px 15px; border: 0; border-radius: 0; background: #fff; }
+.access-credentials .trial-credential + .trial-credential { border-top: 1px solid #ededf0; }
+.access-credentials .trial-credential strong { font-size: 16px; }
+.access-expiry { display: flex; align-items: center; gap: 10px; margin-top: 13px; padding: 10px 13px; border-radius: 10px; background: #f5f5f7; color: #36363d; }
+.access-expiry > span { color: #c81927; font-size: 23px; line-height: 1; }
+.access-expiry div { display: grid; gap: 2px; }
+.access-expiry small { display: block; color: #64646c; font-size: 11px; font-weight: 700; }
+.access-expiry strong { font-size: 14px; }
+.access-card .access-copy { margin-top: 15px; }
+.access-next { margin-top: 24px; padding-top: 20px; border-top: 1px solid #e6e6e9; }
+.access-next h3 { margin: 0 0 5px; font-size: 17px; letter-spacing: -.02em; }
+.access-next p { margin: 0; color: #62626b; font-size: 13px; line-height: 1.45; }
+.access-destinations { display: grid; gap: 8px; margin-top: 14px; }
+.access-destinations a { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 46px; padding: 9px 13px; border: 1px solid #dedee3; border-radius: 9px; background: #fff; color: #222228; font-size: 14px; font-weight: 750; }
 .access-destinations a:first-child { border-color: #d61524; background: #df1424; color: #fff; }
 .access-destinations a:hover { border-color: #a9a9b2; background: #f6f6f8; }
 .access-destinations a:first-child:hover { background: #bd0f1c; color: #fff; }

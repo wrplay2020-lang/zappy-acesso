@@ -44,10 +44,14 @@ export async function POST(request: Request) {
     if (action === "list") {
       const data = await zappy("/resellers") as { resellers?: unknown };
       if (!Array.isArray(data.resellers)) throw new Error("Resposta inesperada da Zappy.");
+      const contacts = env.DB ? await env.DB.prepare("SELECT reseller_id, whatsapp FROM reseller_contacts").all<{ reseller_id: string; whatsapp: string }>()
+        .then(result => new Map(result.results.map(item => [item.reseller_id, item.whatsapp])))
+        .catch(() => new Map<string, string>()) : new Map<string, string>();
       const resellers = data.resellers.slice(0, 500).map((item: Record<string, unknown>) => ({
         id: String(item.id ?? ""), username: String(item.username ?? ""), displayName: String(item.displayName ?? ""),
         creditsBalance: Number(item.creditsBalance ?? 0), status: String(item.status ?? ""), depth: Number(item.depth ?? 0),
         canCreateSubresellers: Boolean(item.canCreateSubresellers),
+        whatsapp: contacts.get(String(item.id ?? "")) ?? (typeof item.whatsapp === "string" && /^\d{10,15}$/.test(item.whatsapp) ? item.whatsapp : ""),
       }));
       return Response.json({ resellers }, { headers });
     }

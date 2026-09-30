@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type Reseller = { id: string; username: string; displayName: string; creditsBalance: number; status: string; depth: number; canCreateSubresellers: boolean };
+type Reseller = { id: string; username: string; displayName: string; creditsBalance: number; status: string; depth: number; canCreateSubresellers: boolean; whatsapp: string };
 type Transaction = { id: string; type: string; amount: number; balanceBefore: number; balanceAfter: number; createdAt: string };
 type Page = { page: number; limit: number; total: number };
 const savedKey = "zappy-dashboard-key";
@@ -94,11 +94,11 @@ export function RevendasDashboard() {
     <section className="dashboard-history">
       <h2>Suas sub-revendas ({resellers.length})</h2>
       <p className="dashboard-note">Saldos informados pela API da Zappy. Contas novas começam com 0 créditos.</p>
-      {resellers.length ? <ul className="reseller-admin-list">{resellers.map(item => <li key={item.id}><div><strong>{item.displayName}</strong><span>@{item.username} · {item.status} · nível {item.depth}</span></div><b>{item.creditsBalance} crédito(s)</b></li>)}</ul> : <p>Nenhuma sub-revenda encontrada.</p>}
+      {resellers.length ? <ul className="reseller-admin-list">{resellers.map(item => <li key={item.id}><div><strong>{item.displayName}</strong><span>@{item.username} · {item.status} · nível {item.depth}</span>{item.whatsapp && <a className="reseller-admin-whatsapp" href={"https://wa.me/" + (item.whatsapp.length <= 11 ? "55" + item.whatsapp : item.whatsapp)} target="_blank" rel="noopener noreferrer" aria-label={"Conversar com " + item.displayName + " no WhatsApp"}>Conversar no WhatsApp ↗</a>}</div><b>{item.creditsBalance} crédito(s)</b></li>)}</ul> : <p>Nenhuma sub-revenda encontrada.</p>}
     </section>
     <section className="dashboard-history">
       <h2>Cadastro de novos revendedores</h2>
-      <p>A própria pessoa cria a conta na Zappy pelo seu convite. Ela começa com 0 créditos e sem testes até você carregar.</p>
+      <p>A pessoa cria a conta pelo site. Os cadastros novos com WhatsApp aparecem na lista acima. Ela começa com 0 créditos até você carregar.</p>
       <a className="reseller-admin-entry" href="/revenda">Ver página pública de revenda →</a>
     </section>
     <section className="dashboard-history">

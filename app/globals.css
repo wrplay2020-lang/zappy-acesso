@@ -477,3 +477,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .reseller-invite-summary { grid-template-columns: 1fr; }
   .reseller-page .reseller-content { padding-top: 42px; }
 }
+
+.reseller-admin-whatsapp { display: inline-flex; align-items: center; width: fit-content; margin-top: 7px; padding: 7px 11px; border: 1px solid #267b51; border-radius: 8px; background: #143c2b; color: #d8fbe6; font-size: 12px; font-weight: 750; }
+.reseller-admin-whatsapp:hover { background: #1b573d; }

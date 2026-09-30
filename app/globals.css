@@ -453,3 +453,27 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .reseller-next { max-width: 660px; padding: 22px 25px; border: 1px solid #38383f; border-radius: 15px; background: #19191d; }
 .reseller-next h2 { margin: 0 0 7px; font-size: 20px; }
 .reseller-next p { margin: 0; color: #d1d1d8; font-size: 15px; line-height: 1.55; }
+
+/* Navegação clara entre os dois tipos de cadastro */
+.audience-nav { display: flex; gap: 4px; width: fit-content; max-width: calc(100% - 40px); margin: 22px auto 0; padding: 5px; border: 1px solid #383840; border-radius: 999px; background: #19191e; }
+.audience-nav > * { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 42px; padding: 9px 21px; border-radius: 999px; font-size: 14px; font-weight: 750; white-space: nowrap; }
+.audience-current { background: #ee1b2d; color: #fff; box-shadow: 0 3px 12px #e3132733; }
+.audience-link { color: #d5d5da; transition: background .2s, color .2s; }
+.audience-link:hover { background: #303037; color: #fff; }
+.reseller-invite { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(230px, .8fr); gap: clamp(25px, 6vw, 70px); align-items: center; padding: 34px 36px; margin-bottom: 72px; border: 1px solid #38323a; border-radius: 22px; background: radial-gradient(circle at 85% 10%, #531421 0%, transparent 45%), #17171c; }
+.reseller-invite h2 { max-width: 600px; margin: 16px 0 12px; font-size: clamp(30px, 4vw, 45px); line-height: 1.12; letter-spacing: -.045em; }
+.reseller-invite-copy > p:not(.eyebrow) { max-width: 590px; margin: 0; color: #d6d6dc; font-size: 16px; line-height: 1.55; }
+.reseller-invite-link { align-items: center; justify-content: center; gap: 12px; min-height: 48px; margin-top: 22px; padding: 11px 18px; border: 1px solid #df1424; border-radius: 10px; background: #df1424; color: #fff; font-size: 14px; }
+.reseller-invite-link:hover { background: #bd0f1c; }
+.reseller-invite-summary { display: grid; gap: 9px; }
+.reseller-invite-summary div { display: flex; align-items: center; gap: 14px; padding: 15px; border: 1px solid #49404a; border-radius: 12px; background: #ffffff0a; }
+.reseller-invite-summary strong { color: #f5717d; font-size: 18px; }
+.reseller-invite-summary span { color: #f4f4f5; font-size: 14px; font-weight: 650; }
+.reseller-page .reseller-content { padding-top: 52px; }
+@media (max-width: 700px) {
+  .audience-nav { width: calc(100% - 40px); margin-top: 16px; }
+  .audience-nav > * { flex: 1; min-width: 0; padding: 9px 8px; font-size: 13px; }
+  .reseller-invite { grid-template-columns: 1fr; gap: 22px; margin: 0 20px 56px; padding: 25px 22px; }
+  .reseller-invite-summary { grid-template-columns: 1fr; }
+  .reseller-page .reseller-content { padding-top: 42px; }
+}

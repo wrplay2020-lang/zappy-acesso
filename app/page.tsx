@@ -8,6 +8,10 @@ export default function Home() {
       <Link href="/" className="logo" aria-label="Zappy, início"><span className="logo-z">Z</span><span>Zappy</span></Link>
       <a href="https://onzappy.com/login" target="_blank" rel="noopener noreferrer" className="login-link">Já tenho acesso</a>
     </header>
+    <nav className="audience-nav" aria-label="Escolha seu acesso">
+      <span className="audience-current" aria-current="page">Para assistir</span>
+      <Link href="/revenda" className="audience-link">Para revender <span aria-hidden="true">↗</span></Link>
+    </nav>
     <section className="experience" aria-labelledby="page-title">
       <div className="hero-copy">
         <p className="eyebrow">NOVELINHAS NO CELULAR</p>
@@ -33,10 +37,17 @@ export default function Home() {
       </div>
     </section>
     <section className="reseller-invite" aria-labelledby="reseller-invite-title">
-      <p className="eyebrow">PARA REVENDEDORES</p>
-      <h2 id="reseller-invite-title">Quer revender Zappy?</h2>
-      <p>Crie sua própria conta de sub-revenda pelo convite da Zappy.</p>
-      <Link href="/revenda" className="reseller-invite-link">Conhecer a revenda →</Link>
+      <div className="reseller-invite-copy">
+        <p className="eyebrow">PARA REVENDEDORES</p>
+        <h2 id="reseller-invite-title">Seu negócio também pode começar aqui.</h2>
+        <p>Crie sua conta de revenda em poucos passos. Entre no painel da Zappy com seu usuário e solicite créditos para começar a atender seus clientes.</p>
+        <Link href="/revenda" className="reseller-invite-link">Criar conta de revendedor <span aria-hidden="true">→</span></Link>
+      </div>
+      <div className="reseller-invite-summary" aria-label="Etapas para revender">
+        <div><strong>01</strong><span>Cadastre sua revenda</span></div>
+        <div><strong>02</strong><span>Solicite créditos</span></div>
+        <div><strong>03</strong><span>Atenda seus clientes</span></div>
+      </div>
     </section>
   </main>;
 }

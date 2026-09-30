@@ -7,10 +7,14 @@ export default function Revenda() {
       <Link href="/" className="logo" aria-label="Zappy, voltar ao início"><span className="logo-z">Z</span> Zappy</Link>
       <Link href="/" className="login-link">Voltar ao site</Link>
     </header>
+    <nav className="audience-nav" aria-label="Escolha seu acesso">
+      <Link href="/" className="audience-link">Para assistir</Link>
+      <span className="audience-current" aria-current="page">Para revender</span>
+    </nav>
     <section className="reseller-content" aria-labelledby="reseller-title">
       <p className="eyebrow">PARA REVENDEDORES</p>
       <h1 id="reseller-title">Venda novelinhas com a <em>Zappy.</em></h1>
-      <p className="reseller-intro">Crie sua conta de revendedor aqui. Depois do cadastro, você poderá entrar no painel da Zappy.</p>
+      <p className="reseller-intro">Cadastre sua revenda, acesse o painel da Zappy e solicite créditos para começar a atender seus clientes.</p>
       <ResellerSignupForm />
       <div className="reseller-next">
         <h2>Depois do cadastro</h2>

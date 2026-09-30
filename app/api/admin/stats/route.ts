@@ -14,7 +14,10 @@ export async function POST(request: Request) {
   const status = ["CREATED", "FAILED", "CREATING"].includes(url.searchParams.get("status") ?? "") ? url.searchParams.get("status")! : "all";
   const start = now - (period === "day" ? 1 : period === "month" ? 30 : 7) * 86400000;
   const username = (url.searchParams.get("username") ?? "").trim().toLowerCase().slice(0, 20);
-  const [lastDay, lastWeek, history, reasons] = await Promise.all([
+  const localDate = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(now));
+  const todayStart = Date.parse(`${localDate}T00:00:00-03:00`);
+  const [today, lastDay, lastWeek, history, reasons] = await Promise.all([
+    env.DB.prepare("SELECT status, COUNT(*) AS total FROM trial_requests WHERE created_at >= ? GROUP BY status").bind(todayStart).all<{ status: string; total: number }>(),
     env.DB.prepare("SELECT status, COUNT(*) AS total FROM trial_requests WHERE created_at >= ? GROUP BY status").bind(now - 86400000).all<{ status: string; total: number }>(),
     env.DB.prepare("SELECT status, COUNT(*) AS total FROM trial_requests WHERE created_at >= ? GROUP BY status").bind(now - 7 * 86400000).all<{ status: string; total: number }>(),
     (username
@@ -33,7 +36,7 @@ export async function POST(request: Request) {
     failed: rows.find(row => row.status === "FAILED")?.total ?? 0,
     pending: rows.find(row => row.status === "CREATING")?.total ?? 0,
   });
-  return Response.json({ lastDay: counts(lastDay.results), lastWeek: counts(lastWeek.results), history: history.results, reasons: reasons.results }, { headers: { "Cache-Control": "no-store" } });
+  return Response.json({ today: counts(today.results), lastDay: counts(lastDay.results), lastWeek: counts(lastWeek.results), history: history.results, reasons: reasons.results }, { headers: { "Cache-Control": "no-store" } });
 }
 
 async function matchesKey(a: string, b: string) {

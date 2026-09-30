@@ -227,6 +227,26 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .dashboard-history th, .dashboard-history td { padding: 11px 9px; border-top: 1px solid #36363b; white-space: nowrap; }
 .dashboard-history td:nth-child(2) { font-weight: 700; }
 
+.dashboard-mobile-list { display: none; }
+.dashboard-mobile-card { list-style: none; }
+.dashboard-mobile-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.dashboard-status { flex: none; padding: 5px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+.dashboard-status-created { color: #a4f4c0; background: #173d2a; }
+.dashboard-status-failed { color: #ffb4b4; background: #4a2225; }
+.dashboard-status-creating { color: #ffe2a6; background: #47351a; }
+.release-unavailable { max-width: 430px; margin: 10px auto 0; color: #c7c3c9; font-size: 13px; line-height: 1.45; text-align: center; }
+@media (max-width: 700px) {
+  .dashboard-table-wrap { display: none; }
+  .dashboard-mobile-list { display: grid; gap: 11px; margin: 0; padding: 0; }
+  .dashboard-mobile-card { min-width: 0; padding: 15px; border: 1px solid #34343b; border-radius: 11px; background: #222226; overflow-wrap: anywhere; }
+  .dashboard-mobile-top strong { font-size: 16px; }
+  .dashboard-mobile-card dl { display: grid; gap: 8px; margin: 13px 0 0; }
+  .dashboard-mobile-card dl div { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid #393940; padding-top: 8px; font-size: 12px; }
+  .dashboard-mobile-card dt { flex: none; color: #a9a9b2; }
+  .dashboard-mobile-card dd { margin: 0; text-align: right; color: #f1f1f3; }
+}
+
+
 .promo {
   display: block;
   position: relative;

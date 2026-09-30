@@ -81,6 +81,8 @@ export function Dashboard() {
     <button disabled={busy} type="submit">{busy ? "Carregando…" : "Entrar"}</button>
   </form>;
 
+  const pendingItems = !search && status === "all" ? stats.history.filter(item => item.status === "CREATING") : [];
+
   return <div className="dashboard-results">
     <div className="dashboard-actions"><button type="button" onClick={() => load()} disabled={busy}>{busy ? "Atualizando…" : "Atualizar"}</button><button type="button" onClick={() => { sessionStorage.removeItem(sessionKey); setKey(""); setStats(null); }}>Sair</button></div>
     <p className="dashboard-note">Atualização automática a cada 30 segundos enquanto esta aba estiver aberta.</p>
@@ -89,6 +91,11 @@ export function Dashboard() {
       <h2>{label}</h2>
       <dl><div><dt>Criados</dt><dd>{values.created}</dd></div><div><dt>Falharam</dt><dd>{values.failed}</dd></div><div><dt>Sem confirmação</dt><dd>{values.pending}</dd></div></dl>
     </section>)}</div>
+    {pendingItems.length > 0 && <section className="dashboard-history" aria-labelledby="pending-heading">
+      <h2 id="pending-heading">Precisam de conferência ({pendingItems.length})</h2>
+      <p className="dashboard-note">A resposta da Zappy não foi confirmada. Confira esses usuários no painel da Zappy antes de criar outro teste.</p>
+      <ul>{pendingItems.map(item => <li key={item.id}><strong>{item.username ?? "Usuário não registrado"}</strong> · {new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" }).format(item.created_at)}</li>)}</ul>
+    </section>}
     <section className="dashboard-history">
       <h2>Tentativas recentes</h2>
       <div className="dashboard-filters">

@@ -16,7 +16,7 @@ export async function matchesKey(a: string, b: string) {
 }
 
 async function ensureTable() {
-  await env.DB.prepare("CREATE TABLE IF NOT EXISTS admin_sessions (token_hash TEXT PRIMARY KEY, expires_at INTEGER NOT NULL)").run();
+  await env.DB!.prepare("CREATE TABLE IF NOT EXISTS admin_sessions (token_hash TEXT PRIMARY KEY, expires_at INTEGER NOT NULL)").run();
 }
 
 function tokenFrom(request: Request) {
@@ -29,14 +29,14 @@ export async function authorized(request: Request) {
   const token = tokenFrom(request);
   if (!token) return false;
   await ensureTable();
-  const row = await env.DB.prepare("SELECT expires_at FROM admin_sessions WHERE token_hash = ?").bind(await digest(token)).first<{ expires_at: number }>();
+  const row = await env.DB!.prepare("SELECT expires_at FROM admin_sessions WHERE token_hash = ?").bind(await digest(token)).first<{ expires_at: number }>();
   return Boolean(row && row.expires_at > Date.now());
 }
 
 export async function createSession() {
   await ensureTable();
   const token = Array.from(crypto.getRandomValues(new Uint8Array(32)), byte => byte.toString(16).padStart(2, "0")).join("");
-  await env.DB.prepare("INSERT INTO admin_sessions (token_hash, expires_at) VALUES (?, ?)").bind(await digest(token), Date.now() + lifetime).run();
+  await env.DB!.prepare("INSERT INTO admin_sessions (token_hash, expires_at) VALUES (?, ?)").bind(await digest(token), Date.now() + lifetime).run();
   return `${cookieName}=${token}; HttpOnly; Secure; SameSite=Strict; Path=/api/admin; Max-Age=${lifetime / 1000}`;
 }
 
@@ -44,7 +44,7 @@ export async function deleteSession(request: Request) {
   const token = tokenFrom(request);
   if (token && env.DB) {
     await ensureTable();
-    await env.DB.prepare("DELETE FROM admin_sessions WHERE token_hash = ?").bind(await digest(token)).run();
+    await env.DB!.prepare("DELETE FROM admin_sessions WHERE token_hash = ?").bind(await digest(token)).run();
   }
   return `${cookieName}=; HttpOnly; Secure; SameSite=Strict; Path=/api/admin; Max-Age=0`;
 }

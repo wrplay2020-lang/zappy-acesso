@@ -7,6 +7,7 @@ type Release = { id: string; title: string; synopsis: string; coverUrl: string; 
 export function ReleaseShowcase() {
   const [items, setItems] = useState<Release[]>([]);
   const [current, setCurrent] = useState(0);
+  const [catalogUnavailable, setCatalogUnavailable] = useState(false);
   const newestId = useRef<string | null>(null);
 
   useEffect(() => {
@@ -18,13 +19,15 @@ export function ReleaseShowcase() {
       try {
         const response = await fetch("/api/releases", { cache: "no-store" });
         const body = await response.json() as { items?: Release[] };
-        if (!active || !Array.isArray(body.items) || !body.items.length) return;
+        if (!active) return;
+        if (!response.ok || !Array.isArray(body.items) || !body.items.length) { setCatalogUnavailable(true); return; }
+        setCatalogUnavailable(false);
         if (body.items[0].id !== newestId.current) {
           newestId.current = body.items[0].id;
           setCurrent(0);
         }
         setItems(body.items);
-      } catch { /* Keep the last successful list on a temporary failure. */ }
+      } catch { if (active) setCatalogUnavailable(true); /* Keep the last successful list on a temporary failure. */ }
       finally { loading = false; }
     }
     void refresh();
@@ -40,11 +43,11 @@ export function ReleaseShowcase() {
     return () => window.clearInterval(timer);
   }, [items.length]);
 
-  if (!items.length) return <a className="promo" href="#teste" aria-label="Criar teste grátis Zappy">
+  if (!items.length) return <div className="release-fallback"><a className="promo" href="#teste" aria-label="Criar teste grátis Zappy">
     <img src="/zappy-novidades.jpg" alt="Novidades do Zappy" className="promo-image promo-first"/>
     <img src="/zappy-episodio.jpg" alt="" className="promo-image promo-second"/>
     <img src="/zappy-celular.jpg" alt="" className="promo-image promo-third"/>
-  </a>;
+  </a>{catalogUnavailable && <p role="status" className="release-unavailable">Lançamentos indisponíveis no momento. Tentaremos atualizar automaticamente.</p>}</div>;
 
   const item = items[current] ?? items[0];
   return <div className="release-showcase" aria-label="Lançamentos do Zappy">

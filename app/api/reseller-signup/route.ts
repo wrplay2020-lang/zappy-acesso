@@ -44,6 +44,7 @@ export async function POST(request: Request) {
   const id = crypto.randomUUID();
   try {
     await db.prepare("CREATE TABLE IF NOT EXISTS reseller_signup_attempts (id TEXT PRIMARY KEY, ip_hash TEXT NOT NULL, username TEXT NOT NULL, status TEXT NOT NULL, created_at INTEGER NOT NULL)").run();
+    await db.prepare("CREATE TABLE IF NOT EXISTS reseller_contacts (reseller_id TEXT PRIMARY KEY, username TEXT NOT NULL, display_name TEXT NOT NULL, whatsapp TEXT NOT NULL, created_at INTEGER NOT NULL)").run();
     const recent = await db.prepare("SELECT COUNT(*) AS total FROM reseller_signup_attempts WHERE ip_hash = ? AND created_at > ?").bind(ipHash, now - 86400000).first<{ total: number }>();
     if ((recent?.total ?? 0) >= 3) return reply({ error: "Limite de cadastros por dia atingido. Tente novamente amanhã." }, 429);
     const pending = await db.prepare("SELECT id FROM reseller_signup_attempts WHERE username = ? AND status IN ('CREATING', 'CREATED') AND created_at > ? LIMIT 1").bind(username, now - 86400000).first<{ id: string }>();
@@ -68,6 +69,7 @@ export async function POST(request: Request) {
       if (response.status === 429) return reply({ error: "Muitos cadastros no momento. Tente mais tarde." }, 429);
       return reply({ error: "A Zappy não conseguiu criar a conta agora. Tente mais tarde." }, 502);
     }
+    await db.prepare("INSERT OR REPLACE INTO reseller_contacts (reseller_id, username, display_name, whatsapp, created_at) VALUES (?, ?, ?, ?, ?)").bind(body.data.resellerId, body.data.username ?? username, displayName, whatsapp, now).run().catch(error => console.error("reseller_contact_save_failed", id, error));
     await db.prepare("UPDATE reseller_signup_attempts SET status = 'CREATED' WHERE id = ?").bind(id).run().catch(() => {});
     return reply({ success: true, username: body.data.username ?? username }, 201);
   } catch {

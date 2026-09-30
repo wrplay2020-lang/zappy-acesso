@@ -54,6 +54,7 @@ export async function POST(request: Request) {
         creditsBalance: Number(item.creditsBalance ?? 0), status: String(item.status ?? ""), depth: Number(item.depth ?? 0),
         canCreateSubresellers: Boolean(item.canCreateSubresellers),
         whatsapp: byId.get(String(item.id ?? "")) ?? pendingByUsername.get(String(item.username ?? "")) ?? (typeof item.whatsapp === "string" && /^\d{10,15}$/.test(item.whatsapp) ? item.whatsapp : ""),
+        contactPending: !byId.has(String(item.id ?? "")) && pendingByUsername.has(String(item.username ?? "")),
       }));
       return Response.json({ resellers }, { headers });
     }

@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     if (action === "list") {
       const data = await zappy("/resellers") as { resellers?: unknown };
       if (!Array.isArray(data.resellers)) throw new Error("Resposta inesperada da Zappy.");
-      const contacts = env.DB ? await env.DB.prepare("SELECT reseller_id, username, whatsapp FROM reseller_contacts").all<{ reseller_id: string; username: string; whatsapp: string }>()
+      const contacts = env.DB ? await env.DB.prepare("SELECT c.reseller_id, c.username, c.whatsapp FROM reseller_contacts c LEFT JOIN reseller_signup_attempts a ON c.reseller_id = 'pending:' || a.id WHERE c.reseller_id NOT LIKE 'pending:%' OR a.status IN ('CREATING', 'CREATED')").all<{ reseller_id: string; username: string; whatsapp: string }>()
         .then(result => result.results)
         .catch(() => [] as { reseller_id: string; username: string; whatsapp: string }[]) : [];
       const byId = new Map(contacts.filter(item => !item.reseller_id.startsWith("pending:")).map(item => [item.reseller_id, item.whatsapp]));

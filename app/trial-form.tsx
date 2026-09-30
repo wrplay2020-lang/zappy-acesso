@@ -85,6 +85,7 @@ export function TrialForm() {
           usernameRef.current?.select();
           return;
         }
+        if (result.code === "trial_unconfirmed") throw new Error(result.error ?? "Não foi possível confirmar o teste. Aguarde dois minutos antes de tentar de novo.");
         if (response.status === 403) throw new Error("A verificação expirou. Faça a verificação de segurança novamente e tente criar o teste.");
         if (response.status === 502) throw new Error("Não foi possível confirmar o teste. Aguarde alguns minutos antes de tentar de novo para evitar um pedido duplicado.");
         if (response.status === 429) throw new Error(result.error ?? "Limite de testes atingido. Tente novamente amanhã.");

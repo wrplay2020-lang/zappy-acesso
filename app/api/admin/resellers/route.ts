@@ -1,20 +1,9 @@
 import { env } from "cloudflare:workers";
+import { authorized } from "../session-store";
 
 const base = "https://onzappy.com/api/v1/reseller";
 const headers = { "Cache-Control": "no-store" };
 type Input = { action?: unknown; page?: unknown; resellerId?: unknown; amount?: unknown; notes?: unknown; confirmation?: unknown; whatsapp?: unknown };
-
-async function authorized(request: Request) {
-  if (!env.ADMIN_DASHBOARD_KEY || !env.ZAPPY_API_KEY) return "Painel ainda não configurado.";
-  if (request.headers.get("Origin") !== new URL(request.url).origin) return "Solicitação inválida.";
-  const supplied = request.headers.get("X-Dashboard-Key") ?? "";
-  if (!supplied || supplied.length > 256) return "Chave incorreta.";
-  const digest = async (value: string) => new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)));
-  const [a, b] = await Promise.all([digest(supplied), digest(env.ADMIN_DASHBOARD_KEY)]);
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
-  return diff === 0 ? null : "Chave incorreta.";
-}
 
 async function zappy(path: string, payload?: Record<string, unknown>, idempotencyKey?: string) {
   const response = await fetch(base + path, {
@@ -34,8 +23,9 @@ async function zappy(path: string, payload?: Record<string, unknown>, idempotenc
 }
 
 export async function POST(request: Request) {
-  const failure = await authorized(request);
-  if (failure) return Response.json({ error: failure }, { status: failure === "Painel ainda não configurado." ? 503 : failure === "Solicitação inválida." ? 403 : 401, headers });
+  if (!env.ADMIN_DASHBOARD_KEY || !env.ZAPPY_API_KEY || !env.DB) return Response.json({ error: "Painel ainda não configurado." }, { status: 503, headers });
+  if (request.headers.get("Origin") !== new URL(request.url).origin) return Response.json({ error: "Solicitação inválida." }, { status: 403, headers });
+  if (!(await authorized(request))) return Response.json({ error: "Sessão expirada. Entre novamente." }, { status: 401, headers });
   let input: Input;
   try { input = await request.json(); } catch { return Response.json({ error: "Dados inválidos." }, { status: 400, headers }); }
   if (!input || typeof input !== "object") return Response.json({ error: "Dados inválidos." }, { status: 400, headers });
@@ -56,7 +46,10 @@ export async function POST(request: Request) {
         whatsapp: byId.get(String(item.id ?? "")) ?? pendingByUsername.get(String(item.username ?? "")) ?? (typeof item.whatsapp === "string" && /^\d{10,15}$/.test(item.whatsapp) ? item.whatsapp : ""),
         contactPending: !byId.has(String(item.id ?? "")) && pendingByUsername.has(String(item.username ?? "")),
       }));
-      return Response.json({ resellers }, { headers });
+      const signupAttempts = await env.DB.prepare("SELECT username, status, created_at FROM reseller_signup_attempts ORDER BY created_at DESC LIMIT 25")
+        .all<{ username: string; status: string; created_at: number }>()
+        .then(result => result.results).catch(() => []);
+      return Response.json({ resellers, signupAttempts }, { headers });
     }
     if (action === "saveContact") {
       const resellerId = String(input.resellerId ?? "").trim();

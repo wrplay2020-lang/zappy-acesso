@@ -1,14 +1,12 @@
 import { env } from "cloudflare:workers";
 import { ensureReviewTable } from "../review-store";
+import { authorized } from "../session-store";
 
 export async function POST(request: Request) {
   const configured = env.ADMIN_DASHBOARD_KEY;
   if (!configured || !env.DB) return Response.json({ error: "Painel ainda não configurado." }, { status: 503 });
   if (request.headers.get("Origin") !== new URL(request.url).origin) return Response.json({ error: "Solicitação inválida." }, { status: 403 });
-  const submitted = request.headers.get("X-Dashboard-Key") ?? "";
-  if (!submitted || submitted.length > 256 || !(await matchesKey(submitted, configured))) {
-    return Response.json({ error: "Chave incorreta." }, { status: 401, headers: { "Cache-Control": "no-store" } });
-  }
+  if (!(await authorized(request))) return Response.json({ error: "Sessão expirada. Entre novamente." }, { status: 401, headers: { "Cache-Control": "no-store" } });
   await ensureReviewTable();
   const now = Date.now();
   const url = new URL(request.url);
@@ -24,7 +22,7 @@ export async function POST(request: Request) {
   const parameters: (string | number)[] = [username || start];
   if (status !== "all") { filters.push(effectiveStatus + " = ?"); parameters.push(status); }
   const historyQuery = "SELECT tr.id, tr.username, " + effectiveStatus + " AS status, tr.failure_code, tr.created_at, rv.reviewed_at FROM trial_requests tr LEFT JOIN trial_reviews rv ON rv.trial_id = tr.id WHERE " + filters.join(" AND ") + " ORDER BY tr.created_at DESC LIMIT 50";
-  const [today, lastDay, lastWeek, history, reasons] = await Promise.all([
+  const [today, lastDay, lastWeek, history, reasons, expiringToday] = await Promise.all([
     env.DB.prepare(countsQuery).bind(todayStart).all<{ status: string; total: number }>(),
     env.DB.prepare(countsQuery).bind(now - 86400000).all<{ status: string; total: number }>(),
     env.DB.prepare(countsQuery).bind(now - 7 * 86400000).all<{ status: string; total: number }>(),
@@ -32,6 +30,8 @@ export async function POST(request: Request) {
       .all<{ id: string; username: string | null; status: string; failure_code: string | null; created_at: number; reviewed_at: number | null }>(),
     env.DB.prepare("SELECT failure_code, COUNT(*) AS total FROM trial_requests WHERE created_at >= ? AND status = 'FAILED' GROUP BY failure_code")
       .bind(start).all<{ failure_code: string | null; total: number }>(),
+    env.DB.prepare("SELECT COUNT(*) AS total FROM trial_requests WHERE status = 'CREATED' AND created_at >= ? AND created_at < ?")
+      .bind(todayStart - 86400000, todayStart).first<{ total: number }>(),
   ]);
   const counts = (rows: { status: string; total: number }[]) => ({
     created: rows.find(row => row.status === "CREATED")?.total ?? 0,
@@ -39,13 +39,6 @@ export async function POST(request: Request) {
     pending: rows.find(row => row.status === "CREATING")?.total ?? 0,
     reviewed: rows.find(row => row.status === "REVIEWED")?.total ?? 0,
   });
-  return Response.json({ today: counts(today.results), lastDay: counts(lastDay.results), lastWeek: counts(lastWeek.results), history: history.results, reasons: reasons.results }, { headers: { "Cache-Control": "no-store" } });
+  return Response.json({ expiringToday: expiringToday?.total ?? 0, today: counts(today.results), lastDay: counts(lastDay.results), lastWeek: counts(lastWeek.results), history: history.results, reasons: reasons.results }, { headers: { "Cache-Control": "no-store" } });
 }
 
-async function matchesKey(a: string, b: string) {
-  const digest = async (value: string) => new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)));
-  const [left, right] = await Promise.all([digest(a), digest(b)]);
-  let different = 0;
-  for (let i = 0; i < left.length; i++) different |= left[i] ^ right[i];
-  return different === 0;
-}

@@ -4,12 +4,11 @@ import { useEffect, useRef, useState } from "react";
 
 type Counts = { created: number; failed: number; pending: number; reviewed: number };
 type Trial = { id: string; username: string | null; status: string; failure_code: string | null; created_at: number; reviewed_at: number | null };
-type Stats = { today: Counts; lastDay: Counts; lastWeek: Counts; history: Trial[]; reasons: { failure_code: string | null; total: number }[] };
+type Stats = { expiringToday: number; today: Counts; lastDay: Counts; lastWeek: Counts; history: Trial[]; reasons: { failure_code: string | null; total: number }[] };
 const labels: Record<string, string> = {
   CREATED: "Criado", FAILED: "Falhou", CREATING: "Sem confirmação", REVIEWED: "Conferido manualmente",
   username_taken: "Usuário já existe", trial_limit: "Limite da Zappy", zappy_error: "Erro da Zappy", unconfirmed: "Resposta não confirmada",
 };
-const sessionKey = "zappy-dashboard-key";
 const trialDurationMs = 24 * 60 * 60 * 1000;
 
 function trialWindow(item: Trial) {
@@ -31,22 +30,20 @@ export function Dashboard() {
   const [restoring, setRestoring] = useState(true);
   const inFlight = useRef(false);
 
-  async function load(event?: React.FormEvent, nextPeriod = period, nextStatus = status, credential = key, silent = false, nextSearch = search) {
+  async function load(event?: React.FormEvent, nextPeriod = period, nextStatus = status, _credential = "", silent = false, nextSearch = search) {
     event?.preventDefault();
-    if (inFlight.current || !credential) return;
+    if (inFlight.current) return;
     inFlight.current = true;
     if (!silent) setBusy(true);
     setError("");
     try {
-      const response = await fetch(`/api/admin/stats?period=${nextPeriod}&status=${nextStatus}&username=${encodeURIComponent(nextSearch)}`, { method: "POST", headers: { "X-Dashboard-Key": credential }, cache: "no-store" });
+      const response = await fetch(`/api/admin/stats?period=${nextPeriod}&status=${nextStatus}&username=${encodeURIComponent(nextSearch)}`, { method: "POST", cache: "no-store" });
       const body = await response.json() as Stats & { error?: string };
       if (response.status === 401) {
-        sessionStorage.removeItem(sessionKey);
         setKey(""); setStats(null);
       }
       if (!response.ok) throw new Error(body.error ?? "Não foi possível carregar os números.");
       setStats(body);
-      sessionStorage.setItem(sessionKey, credential);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Tente novamente.");
     } finally { inFlight.current = false; setBusy(false); setRestoring(false); }
@@ -59,7 +56,7 @@ export function Dashboard() {
     try {
       const response = await fetch("/api/admin/reviews", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "X-Dashboard-Key": key },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: item.id, reviewed }),
         cache: "no-store",
       });
@@ -71,31 +68,51 @@ export function Dashboard() {
     } finally { setReviewingId(null); }
   }
 
+  async function login(event: React.FormEvent) {
+    event.preventDefault();
+    if (busy) return;
+    setBusy(true); setError("");
+    try {
+      const response = await fetch("/api/admin/session", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key }), cache: "no-store" });
+      const body = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(body.error ?? "Não foi possível entrar.");
+      setKey("");
+      await load();
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Não foi possível entrar."); }
+    finally { setBusy(false); }
+  }
+
+  async function logout() {
+    try {
+      const response = await fetch("/api/admin/session", { method: "DELETE", cache: "no-store" });
+      if (!response.ok) throw new Error("Não foi possível sair. Tente novamente.");
+      setKey(""); setStats(null);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Não foi possível sair."); }
+  }
+
   useEffect(() => {
-    const saved = sessionStorage.getItem(sessionKey);
     let active = true;
-    queueMicrotask(() => {
-      if (!active) return;
-      if (saved) { setKey(saved); void load(undefined, "week", "all", saved); }
-      else setRestoring(false);
-    });
+    void fetch("/api/admin/session", { cache: "no-store" }).then(response => response.json()).then(body => {
+      if (active && (body as { authenticated?: boolean }).authenticated) void load();
+      else if (active) setRestoring(false);
+    }).catch(() => { if (active) setRestoring(false); });
     return () => { active = false; };
-    // Restore only once when the tab opens.
+    // Check the server-side session once when opening the panel.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (!stats || !key) return;
+    if (!stats) return;
     const timer = window.setInterval(() => {
-      if (!document.hidden) void load(undefined, period, status, key, true);
+      if (!document.hidden) void load(undefined, period, status, "", true);
     }, 30000);
     return () => window.clearInterval(timer);
     // Refresh the current filters while the dashboard is open.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, period, status, search, Boolean(stats)]);
+  }, [period, status, search, Boolean(stats)]);
 
   useEffect(() => {
-    if (!stats || !key) return;
+    if (!stats) return;
     let active = true;
     async function checkCatalog() {
       try {
@@ -115,10 +132,10 @@ export function Dashboard() {
     return () => { active = false; window.clearInterval(timer); };
     // A consulta do catálogo não depende dos filtros do histórico.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [Boolean(stats), key]);
+  }, [Boolean(stats)]);
 
   if (restoring) return <p className="dashboard-note">Carregando painel…</p>;
-  if (!stats) return <form className="dashboard-login" onSubmit={load}>
+  if (!stats) return <form className="dashboard-login" onSubmit={login}>
     <label htmlFor="dashboard-key">Chave do painel</label>
     <input id="dashboard-key" type="password" autoComplete="off" value={key} onChange={event => setKey(event.target.value)} required />
     {error && <p role="alert" className="dashboard-error">{error}</p>}
@@ -129,7 +146,7 @@ export function Dashboard() {
   const pendingItems = !search && status === "all" ? stats.history.filter(item => item.status === "CREATING") : [];
 
   return <div className="dashboard-results">
-    <div className="dashboard-actions"><button type="button" onClick={() => load()} disabled={busy}>{busy ? "Atualizando…" : "Atualizar"}</button><button type="button" onClick={() => { sessionStorage.removeItem(sessionKey); setKey(""); setStats(null); }}>Sair</button></div>
+    <div className="dashboard-actions"><button type="button" onClick={() => load()} disabled={busy}>{busy ? "Atualizando…" : "Atualizar"}</button><button type="button" onClick={() => void logout()}>Sair</button></div>
     <p className="dashboard-note">Atualização automática a cada 30 segundos enquanto esta aba estiver aberta.</p>
     {error && <p role="alert" className="dashboard-error">{error}</p>}
     <section className="dashboard-history" aria-labelledby="today-heading">
@@ -141,6 +158,7 @@ export function Dashboard() {
         <div><dt>Sem confirmação</dt><dd>{stats.today.pending}</dd></div>
         <div><dt>Conferidos</dt><dd>{stats.today.reviewed}</dd></div>
       </dl>
+      <p className="dashboard-note"><strong>{stats.expiringToday}</strong> teste(s) criado(s) ontem têm prazo estimado para terminar hoje. Confira a situação real na Zappy antes de orientar o cliente.</p>
     </section>
     <section className="dashboard-history" aria-labelledby="catalog-heading">
       <h2 id="catalog-heading">Catálogo da Zappy</h2>

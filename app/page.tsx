@@ -1,5 +1,6 @@
 import { TrialForm } from "./trial-form";
 import Link from "next/link";
+import { ReleaseShowcase } from "./release-showcase";
 
 export default function Home() {
   return <main className="site">
@@ -15,11 +16,7 @@ export default function Home() {
         <TrialForm/>
         <p className="after-trial">Gostou? Adicione 30 dias por <strong>R$ 20 via Pix</strong> dentro do app.</p>
       </div>
-      <a className="promo" href="#teste" aria-label="Criar teste grátis Zappy">
-        <img src="/zappy-novidades.jpg" alt="Novidades do Zappy" className="promo-image promo-first"/>
-        <img src="/zappy-episodio.jpg" alt="" className="promo-image promo-second"/>
-        <img src="/zappy-celular.jpg" alt="" className="promo-image promo-third"/>
-      </a>
+      <ReleaseShowcase/>
     </section>
     <section className="faq" aria-labelledby="faq-title">
       <p className="eyebrow">DÚVIDAS RÁPIDAS</p>

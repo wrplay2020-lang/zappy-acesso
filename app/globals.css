@@ -480,3 +480,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 .reseller-admin-whatsapp { display: inline-flex; align-items: center; width: fit-content; margin-top: 7px; padding: 7px 11px; border: 1px solid #267b51; border-radius: 8px; background: #143c2b; color: #d8fbe6; font-size: 12px; font-weight: 750; }
 .reseller-admin-whatsapp:hover { background: #1b573d; }
+
+.dashboard-switch { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; max-width: 520px; margin: 0 0 30px; padding: 5px; border: 1px solid #45454d; border-radius: 13px; background: #202025; }
+.dashboard-switch > * { display: flex; align-items: center; justify-content: center; min-height: 47px; padding: 10px 14px; border-radius: 9px; color: #d5d5dc; font-size: 15px; font-weight: 800; text-align: center; }
+.dashboard-switch a:hover { background: #303038; color: #fff; }
+.dashboard-switch-current { background: #df1424; color: #fff !important; box-shadow: 0 4px 14px #b3092040; }
+@media (max-width: 390px) { .dashboard-switch > * { min-height: 44px; font-size: 14px; } }

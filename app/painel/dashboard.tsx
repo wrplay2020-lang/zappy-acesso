@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 type Counts = { created: number; failed: number; pending: number; reviewed: number };
 type Trial = { id: string; username: string | null; status: string; failure_code: string | null; created_at: number; reviewed_at: number | null };
-type Stats = { today: Counts; lastDay: Counts; lastWeek: Counts; history: Trial[]; reasons: { failure_code: string | null; total: number }[] };
+type Stats = { expiringToday: number; today: Counts; lastDay: Counts; lastWeek: Counts; history: Trial[]; reasons: { failure_code: string | null; total: number }[] };
 const labels: Record<string, string> = {
   CREATED: "Criado", FAILED: "Falhou", CREATING: "Sem confirmação", REVIEWED: "Conferido manualmente",
   username_taken: "Usuário já existe", trial_limit: "Limite da Zappy", zappy_error: "Erro da Zappy", unconfirmed: "Resposta não confirmada",
@@ -158,6 +158,7 @@ export function Dashboard() {
         <div><dt>Sem confirmação</dt><dd>{stats.today.pending}</dd></div>
         <div><dt>Conferidos</dt><dd>{stats.today.reviewed}</dd></div>
       </dl>
+      <p className="dashboard-note"><strong>{stats.expiringToday}</strong> teste(s) criado(s) ontem têm prazo estimado para terminar hoje. Confira a situação real na Zappy antes de orientar o cliente.</p>
     </section>
     <section className="dashboard-history" aria-labelledby="catalog-heading">
       <h2 id="catalog-heading">Catálogo da Zappy</h2>

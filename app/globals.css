@@ -230,6 +230,18 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   box-shadow: 0 28px 70px rgba(0,0,0,.46);
 }
 .promo-image { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+.release-showcase { position: relative; width: 100%; aspect-ratio: 1229 / 1536; overflow: hidden; border: 1px solid rgba(255,255,255,.16); border-radius: 18px; background: #17070a; box-shadow: 0 28px 70px rgba(0,0,0,.46); }
+.release-link { position: absolute; inset: 0; display: block; }
+.release-cover { display: block; width: 100%; height: 100%; object-fit: cover; }
+.release-link::after { content: ""; position: absolute; inset: 40% 0 0; background: linear-gradient(transparent, rgba(8,6,10,.93)); pointer-events: none; }
+.release-caption { position: absolute; z-index: 1; bottom: 52px; left: 25px; right: 25px; display: grid; gap: 8px; text-shadow: 0 2px 8px #000; }
+.release-caption strong { font-size: clamp(24px,3vw,36px); line-height: 1.1; }
+.release-badge { width: fit-content; padding: 6px 9px; border-radius: 5px; background: #e21d2b; font-size: 11px; font-weight: 800; letter-spacing: .08em; }
+.release-category { color: #ddd; font-size: 13px; }
+.release-action { margin-top: 5px; font-size: 14px; font-weight: 800; }
+.release-controls { position: absolute; z-index: 2; bottom: 22px; left: 25px; right: 25px; display: flex; gap: 7px; }
+.release-controls button { width: 24px; height: 6px; padding: 0; border: 0; border-radius: 8px; background: #aaa; opacity: .6; cursor: pointer; }
+.release-controls button[aria-current="true"] { width: 36px; background: #f22b3b; opacity: 1; }
 .promo-first { animation: poster-cycle 18s linear infinite; }
 .promo-second { animation: poster-cycle 18s linear -12s infinite; }
 .promo-third { animation: poster-cycle 18s linear -6s infinite; }

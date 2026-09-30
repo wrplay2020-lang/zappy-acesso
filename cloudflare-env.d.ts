@@ -6,7 +6,5 @@ declare namespace Cloudflare {
     TURNSTILE_SITE_KEY?: string;
     TURNSTILE_SECRET_KEY?: string;
     ADMIN_DASHBOARD_KEY?: string;
-    ZAPPY_RELEASES_URL?: string;
-    ZAPPY_CATALOG_API_KEY?: string;
   }
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type Reseller = { id: string; username: string; displayName: string; creditsBalance: number; status: string; depth: number; canCreateSubresellers: boolean; whatsapp: string };
+type Reseller = { id: string; username: string; displayName: string; creditsBalance: number; status: string; depth: number; canCreateSubresellers: boolean; whatsapp: string; contactPending: boolean };
 type Transaction = { id: string; type: string; amount: number; balanceBefore: number; balanceAfter: number; createdAt: string };
 type Page = { page: number; limit: number; total: number };
 const savedKey = "zappy-dashboard-key";
@@ -124,7 +124,7 @@ export function RevendasDashboard() {
           <b>{item.creditsBalance} crédito(s)</b>
           <div className="reseller-admin-contact">
             {item.whatsapp ? <>
-              <small>WhatsApp: {item.whatsapp}</small>
+              <small>WhatsApp: {item.whatsapp}{item.contactPending && <span className="reseller-contact-pending"> · vínculo pendente de confirmação</span>}</small>
               <a className="reseller-admin-whatsapp" href={"https://wa.me/" + (item.whatsapp.length <= 11 ? "55" + item.whatsapp : item.whatsapp)} target="_blank" rel="noopener noreferrer" aria-label={"Conversar com " + item.displayName + " no WhatsApp"}>Conversar ↗</a>
             </> : <small>WhatsApp não informado</small>}
             <button type="button" onClick={() => { setContactId(item.id); setContactNumber(item.whatsapp ?? ""); }}> {item.whatsapp ? "Editar número" : "Adicionar número"}</button>

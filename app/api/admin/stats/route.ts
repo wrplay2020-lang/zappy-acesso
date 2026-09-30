@@ -1,14 +1,12 @@
 import { env } from "cloudflare:workers";
 import { ensureReviewTable } from "../review-store";
+import { authorized } from "../session-store";
 
 export async function POST(request: Request) {
   const configured = env.ADMIN_DASHBOARD_KEY;
   if (!configured || !env.DB) return Response.json({ error: "Painel ainda não configurado." }, { status: 503 });
   if (request.headers.get("Origin") !== new URL(request.url).origin) return Response.json({ error: "Solicitação inválida." }, { status: 403 });
-  const submitted = request.headers.get("X-Dashboard-Key") ?? "";
-  if (!submitted || submitted.length > 256 || !(await matchesKey(submitted, configured))) {
-    return Response.json({ error: "Chave incorreta." }, { status: 401, headers: { "Cache-Control": "no-store" } });
-  }
+  if (!(await authorized(request))) return Response.json({ error: "Sessão expirada. Entre novamente." }, { status: 401, headers: { "Cache-Control": "no-store" } });
   await ensureReviewTable();
   const now = Date.now();
   const url = new URL(request.url);
@@ -42,10 +40,3 @@ export async function POST(request: Request) {
   return Response.json({ today: counts(today.results), lastDay: counts(lastDay.results), lastWeek: counts(lastWeek.results), history: history.results, reasons: reasons.results }, { headers: { "Cache-Control": "no-store" } });
 }
 
-async function matchesKey(a: string, b: string) {
-  const digest = async (value: string) => new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)));
-  const [left, right] = await Promise.all([digest(a), digest(b)]);
-  let different = 0;
-  for (let i = 0; i < left.length; i++) different |= left[i] ^ right[i];
-  return different === 0;
-}

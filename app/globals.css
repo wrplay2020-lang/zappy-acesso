@@ -490,12 +490,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .dashboard-history .reseller-admin-list { padding-left: 0; line-height: 1.45; }
 .reseller-admin-list li { min-width: 0; }
 .reseller-admin-list li > div { width: 100%; }
-.reseller-admin-contact { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
-.reseller-admin-contact small { color: #a8a8b1; font-size: 12px; }
-.reseller-admin-contact button { padding: 6px 9px; border: 1px solid #565660; border-radius: 7px; background: #303036; color: #f2f2f5; font-size: 12px; font-weight: 700; cursor: pointer; }
+.reseller-admin-contact { display: grid; justify-items: start; gap: 10px; margin-top: 14px; }
+.reseller-admin-contact small { display: block; color: #a8a8b1; font-size: 13px; line-height: 1.4; }
+.reseller-admin-contact button { min-height: 40px; padding: 8px 12px; border: 1px solid #565660; border-radius: 8px; background: #303036; color: #f2f2f5; font-size: 13px; font-weight: 700; cursor: pointer; }
 .reseller-admin-contact-form { display: grid; gap: 8px; width: 100%; max-width: 350px; margin-top: 9px; }
 .reseller-admin-contact-form input { width: 100%; min-height: 42px; padding: 8px 10px; border: 1px solid #686871; border-radius: 8px; background: #17171b; color: #fff; }
 .reseller-admin-contact-form button { min-height: 40px; padding: 7px 12px; border: 0; border-radius: 8px; background: #df1424; color: #fff; font-weight: 750; cursor: pointer; }
 .reseller-admin-contact-form button:disabled { opacity: .6; }
-.reseller-admin-list li .reseller-admin-contact { display: flex; }
+.reseller-admin-list li .reseller-admin-contact { display: grid; }
 .reseller-admin-list li .reseller-admin-contact-form { display: grid; }

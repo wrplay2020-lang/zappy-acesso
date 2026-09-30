@@ -13,12 +13,17 @@ export async function POST(request: Request) {
   const period = url.searchParams.get("period") === "day" ? "day" : url.searchParams.get("period") === "month" ? "month" : "week";
   const status = ["CREATED", "FAILED", "CREATING"].includes(url.searchParams.get("status") ?? "") ? url.searchParams.get("status")! : "all";
   const start = now - (period === "day" ? 1 : period === "month" ? 30 : 7) * 86400000;
+  const username = (url.searchParams.get("username") ?? "").trim().toLowerCase().slice(0, 20);
   const [lastDay, lastWeek, history, reasons] = await Promise.all([
     env.DB.prepare("SELECT status, COUNT(*) AS total FROM trial_requests WHERE created_at >= ? GROUP BY status").bind(now - 86400000).all<{ status: string; total: number }>(),
     env.DB.prepare("SELECT status, COUNT(*) AS total FROM trial_requests WHERE created_at >= ? GROUP BY status").bind(now - 7 * 86400000).all<{ status: string; total: number }>(),
-    (status === "all"
-      ? env.DB.prepare("SELECT id, username, status, failure_code, created_at FROM trial_requests WHERE created_at >= ? ORDER BY created_at DESC LIMIT 50").bind(start)
-      : env.DB.prepare("SELECT id, username, status, failure_code, created_at FROM trial_requests WHERE created_at >= ? AND status = ? ORDER BY created_at DESC LIMIT 50").bind(start, status))
+    (username
+      ? (status === "all"
+        ? env.DB.prepare("SELECT id, username, status, failure_code, created_at FROM trial_requests WHERE instr(lower(username), ?) > 0 ORDER BY created_at DESC LIMIT 50").bind(username)
+        : env.DB.prepare("SELECT id, username, status, failure_code, created_at FROM trial_requests WHERE instr(lower(username), ?) > 0 AND status = ? ORDER BY created_at DESC LIMIT 50").bind(username, status))
+      : (status === "all"
+        ? env.DB.prepare("SELECT id, username, status, failure_code, created_at FROM trial_requests WHERE created_at >= ? ORDER BY created_at DESC LIMIT 50").bind(start)
+        : env.DB.prepare("SELECT id, username, status, failure_code, created_at FROM trial_requests WHERE created_at >= ? AND status = ? ORDER BY created_at DESC LIMIT 50").bind(start, status)))
       .all<{ id: string; username: string | null; status: string; failure_code: string | null; created_at: number }>(),
     env.DB.prepare("SELECT failure_code, COUNT(*) AS total FROM trial_requests WHERE created_at >= ? AND status = 'FAILED' GROUP BY failure_code")
       .bind(start).all<{ failure_code: string | null; total: number }>(),

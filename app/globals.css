@@ -72,6 +72,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .hero-copy h1 em { color: #ed4653; font-style: normal; }
 .intro { margin: 0 0 26px; color: #ceced5; font-size: 17px; line-height: 1.5; }
 
+.site-highlights { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; max-width: 475px; margin: 0 0 24px; padding: 0; list-style: none; }
+.site-highlights li { display: grid; align-content: center; gap: 3px; min-width: 0; min-height: 76px; padding: 11px 12px; border: 1px solid #3a3238; border-radius: 12px; background: rgba(255,255,255,.045); }
+.site-highlights strong { color: #f8f6f7; font-size: 13px; line-height: 1.25; }
+.site-highlights span { color: #d1d1d8; font-size: 12px; line-height: 1.35; }
+@media (max-width: 390px) { .site-highlights li { padding: 9px 8px; } .site-highlights strong { font-size: 12px; } .site-highlights span { font-size: 11px; } }
+
 .trial-card {
   width: 100%;
   max-width: 475px;

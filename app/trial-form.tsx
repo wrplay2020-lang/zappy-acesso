@@ -101,17 +101,16 @@ export function TrialForm() {
   }
 
   if (access) return <div className="trial-card access-card" id="teste">
-    <p className="card-eyebrow">TUDO PRONTO</p><h2 ref={successHeadingRef} tabIndex={-1}>Seu teste está ativo</h2>
-    <p>Guarde estes dados. Você vai usá-los para entrar no Zappy.</p>
-    <div className="trial-credential"><span>Usuário</span><strong>{access.username}</strong></div>
-    <div className="trial-credential"><span>Senha</span><div className="password-row"><strong>{showPassword ? access.password : "•".repeat(access.password.length)}</strong><button type="button" className="password-toggle" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} aria-pressed={showPassword}>{showPassword ? "Ocultar" : "Mostrar"}</button></div></div>
-    {access.expiresAt && <p className="trial-expiry">Teste válido até {new Date(access.expiresAt).toLocaleString("pt-BR")}.</p>}
-    <button type="button" onClick={async () => { try { await navigator.clipboard.writeText(`Login: ${access.username}\nSenha: ${access.password}`); setCopied(true); setError(""); } catch { setError("Não foi possível copiar automaticamente. Toque em Mostrar e anote a senha."); } }}>{copied ? "✓ Login e senha copiados" : "Copiar login e senha"}</button>
-    {error && <p className="trial-error" role="alert">{error}</p>}
-    <div className="access-guide">
-      <h3>Como começar a assistir</h3>
-      <ol className="first-steps"><li>Copie seu login e sua senha acima.</li><li>Abra o Zappy em uma das opções abaixo.</li><li>Na tela de entrada, digite o usuário e a senha do teste.</li></ol>
+    <div className="access-success-head"><span className="access-check" aria-hidden="true">✓</span><div><p className="card-eyebrow">TESTE CRIADO</p><h2 ref={successHeadingRef} tabIndex={-1}>Seu acesso está pronto</h2></div></div>
+    <p className="access-lead">Guarde seu usuário e sua senha para entrar no Zappy.</p>
+    <div className="access-credentials">
+      <div className="trial-credential"><span>Usuário</span><strong>{access.username}</strong></div>
+      <div className="trial-credential"><span>Senha</span><div className="password-row"><strong>{showPassword ? access.password : "•".repeat(access.password.length)}</strong><button type="button" className="password-toggle" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} aria-pressed={showPassword}>{showPassword ? "Ocultar" : "Mostrar"}</button></div></div>
     </div>
+    {access.expiresAt && <div className="access-expiry"><span aria-hidden="true">◷</span><div><small>Teste válido até</small><strong>{new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(access.expiresAt))}</strong></div></div>}
+    <button type="button" className="access-copy" onClick={async () => { try { await navigator.clipboard.writeText(`Login: ${access.username}\nSenha: ${access.password}`); setCopied(true); setError(""); } catch { setError("Não foi possível copiar automaticamente. Toque em Mostrar e anote a senha."); } }}>{copied ? "✓ Dados copiados" : "Copiar usuário e senha"}</button>
+    {error && <p className="trial-error" role="alert">{error}</p>}
+    <div className="access-next"><h3>Comece a assistir</h3><p>Copie os dados acima, escolha onde abrir o Zappy e faça login.</p></div>
     <div className="access-destinations">
       <a href={access.login} target="_blank" rel="noopener noreferrer">🌐 Entrar pelo navegador <span aria-hidden="true">↗</span></a>
       <a href={access.android} target="_blank" rel="noopener noreferrer"><span className="access-label"><YellowRobot/> Baixar app Android</span><span aria-hidden="true">↗</span></a>

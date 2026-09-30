@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 type Reseller = { id: string; username: string; displayName: string; creditsBalance: number; status: string; depth: number; canCreateSubresellers: boolean; whatsapp: string; contactPending: boolean };
 type Transaction = { id: string; type: string; amount: number; balanceBefore: number; balanceAfter: number; createdAt: string };
 type Page = { page: number; limit: number; total: number };
-const savedKey = "zappy-dashboard-key";
 const date = (value: string) => {
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? "—" : new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(parsed);
@@ -28,40 +27,65 @@ export function RevendasDashboard() {
   const [contactNumber, setContactNumber] = useState("");
   const [search, setSearch] = useState("");
 
-  async function request(action: string, fields: Record<string, unknown> = {}, credential = key) {
+  async function request(action: string, fields: Record<string, unknown> = {}, _credential = "") {
     const response = await fetch("/api/admin/resellers", {
-      method: "POST", headers: { "Content-Type": "application/json", "X-Dashboard-Key": credential },
+      method: "POST", headers: { "Content-Type": "application/json", },
       body: JSON.stringify({ action, ...fields }), cache: "no-store",
     });
     const body = await response.json() as Record<string, unknown> & { error?: string };
     if (!response.ok) {
-      if (response.status === 401) sessionStorage.removeItem(savedKey);
+      if (response.status === 401) setResellers(null);
       throw new Error(body.error ?? "Falha ao consultar a Zappy.");
     }
     return body;
   }
 
-  async function load(credential = key, page = 1) {
-    if (!credential || busy) return;
+  async function load(_credential = "", page = 1) {
+    if (busy) return;
     setBusy(true); setError("");
     try {
-      const [accounts, history] = await Promise.all([request("list", {}, credential), request("transactions", { page }, credential)]);
+      const [accounts, history] = await Promise.all([request("list"), request("transactions", { page })]);
       setResellers(accounts.resellers as Reseller[]);
       setTransactions(history.transactions as Transaction[]);
       setPagination(history.pagination as Page);
-      setKey(credential);
-      sessionStorage.setItem(savedKey, credential);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Não foi possível consultar a Zappy.");
     } finally { setBusy(false); setReady(true); }
   }
 
   useEffect(() => {
-    const value = sessionStorage.getItem(savedKey);
-    queueMicrotask(() => { if (value) { setKey(value); void load(value); } else setReady(true); });
-    // Read the key from this browser tab once.
+    let active = true;
+    void fetch("/api/admin/session", { cache: "no-store" }).then(response => response.json()).then((body: { authenticated?: boolean }) => {
+      if (active && body.authenticated) void load();
+      else if (active) setReady(true);
+    }).catch(() => { if (active) setReady(true); });
+    return () => { active = false; };
+    // Check the server-side session once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function login(event: React.FormEvent) {
+    event.preventDefault();
+    if (busy) return;
+    setBusy(true); setError("");
+    try {
+      const response = await fetch("/api/admin/session", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key }), cache: "no-store" });
+      const body = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(body.error ?? "Não foi possível entrar.");
+      setKey("");
+      setBusy(false);
+      await load();
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Não foi possível entrar."); }
+    finally { setBusy(false); }
+  }
+
+  async function logout() {
+    try {
+      const response = await fetch("/api/admin/session", { method: "DELETE", cache: "no-store" });
+      if (!response.ok) throw new Error("Não foi possível sair. Tente novamente.");
+      setKey(""); setResellers(null); setTransactions([]);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Não foi possível sair."); }
+  }
 
   async function move(event: React.FormEvent) {
     event.preventDefault();
@@ -98,7 +122,7 @@ export function RevendasDashboard() {
   }
 
   if (!ready) return <p className="dashboard-note">Carregando…</p>;
-  if (!resellers) return <form className="dashboard-login" onSubmit={event => { event.preventDefault(); void load(key); }}>
+  if (!resellers) return <form className="dashboard-login" onSubmit={login}>
     <label htmlFor="reseller-key">Chave do painel</label>
     <input id="reseller-key" type="password" autoComplete="off" value={key} onChange={event => setKey(event.target.value)} required />
     {error && <p role="alert" className="dashboard-error">{error}</p>}
@@ -110,7 +134,7 @@ export function RevendasDashboard() {
   );
 
   return <div className="dashboard-results">
-    <div className="dashboard-actions"><button type="button" disabled={busy} onClick={() => void load(key, pagination.page)}>Atualizar</button><button type="button" onClick={() => { sessionStorage.removeItem(savedKey); setKey(""); setResellers(null); setTransactions([]); }}>Sair</button></div>
+    <div className="dashboard-actions"><button type="button" disabled={busy} onClick={() => void load(key, pagination.page)}>Atualizar</button><button type="button" onClick={() => void logout()}>Sair</button></div>
     {error && <p role="alert" className="dashboard-error">{error}</p>}
     {message && <p role="status" className="reseller-admin-success">{message}</p>}
     <section className="dashboard-history">

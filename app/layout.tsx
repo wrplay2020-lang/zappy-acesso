@@ -20,6 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
+      <head><link rel="preconnect" href="https://onzappy.com" crossOrigin="anonymous" /></head>
       <body className="antialiased">{children}</body>
     </html>
   );

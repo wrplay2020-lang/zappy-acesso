@@ -49,7 +49,7 @@ export function ReleaseShowcase() {
   const item = items[current] ?? items[0];
   return <div className="release-showcase" aria-label="Lançamentos do Zappy">
     <a className="release-link" href={item.url} target="_blank" rel="noopener noreferrer">
-      <img className="release-cover" src={item.coverUrl} alt=""/>
+      <img className="release-cover" src={item.coverUrl} alt="" decoding="async" fetchPriority={current === 0 ? "high" : "auto"}/>
       <span className="release-caption"><span className="release-badge">LANÇAMENTOS</span><strong>{item.title}</strong><span className="release-category">{item.categories.join(" · ")}</span><span className="release-action">Ver no Zappy ↗</span></span>
     </a>
   </div>;

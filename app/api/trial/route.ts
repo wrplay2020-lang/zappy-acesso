@@ -34,12 +34,6 @@ export async function POST(request: Request) {
   }
   const db = env.DB;
   const ipHash = ip ? await hash(ip + env.ZAPPY_API_KEY) : "unknown";
-  const recent = await db.prepare("SELECT COUNT(*) AS total FROM trial_requests WHERE ip_hash = ? AND created_at > ? AND status IN ('CREATING', 'CREATED')")
-    .bind(ipHash, Date.now() - 86400000).first<{ total: number }>();
-  if ((recent?.total ?? 0) >= (ip ? 3 : 10)) {
-    return Response.json({ error: "Limite de testes atingido. Tente novamente amanhã." }, { status: 429 });
-  }
-
   const id = crypto.randomUUID();
   const random = Array.from(crypto.getRandomValues(new Uint8Array(8)), byte => byte.toString(36).padStart(2, "0")).join("");
   const password = "Zp@" + random;

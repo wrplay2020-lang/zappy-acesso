@@ -3,14 +3,10 @@ import { env } from "cloudflare:workers";
 type CatalogItem = { id?: unknown; title?: unknown; synopsis?: unknown; coverUrl?: unknown; publishedAt?: unknown; categories?: unknown; url?: unknown };
 
 export async function GET() {
-  const configured = env.ZAPPY_RELEASES_URL;
-  if (!configured) return Response.json({ items: [] }, { headers: { "Cache-Control": "no-store" } });
-  let source: URL;
+  if (!env.ZAPPY_API_KEY) return Response.json({ items: [] }, { headers: { "Cache-Control": "no-store" } });
   try {
-    source = new URL(configured);
-    if (source.protocol !== "https:" || source.hostname !== "onzappy.com" || source.username || source.password) throw new Error("Invalid catalog URL");
-    const response = await fetch(source, {
-      headers: env.ZAPPY_CATALOG_API_KEY ? { Authorization: `Bearer ${env.ZAPPY_CATALOG_API_KEY}` } : {},
+    const response = await fetch("https://onzappy.com/api/v1/reseller/catalog/recent?limit=50", {
+      headers: { Authorization: `Bearer ${env.ZAPPY_API_KEY}` },
       signal: AbortSignal.timeout(8000),
       redirect: "error",
     });

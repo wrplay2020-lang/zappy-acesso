@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { YellowRobot } from "./yellow-robot";
+import { ArrowUpRight, Check, Clock3, Download, Globe2, Smartphone } from "lucide-react";
 
 type Access = { username: string; password: string; expiresAt?: string; login: string; android: string };
 type TurnstileApi = { render: (element: HTMLElement, options: { sitekey: string; theme: string; action: string; callback: (token: string) => void; "expired-callback": () => void; "error-callback": () => void }) => string; reset: (id: string) => void; remove: (id: string) => void };
@@ -101,20 +101,20 @@ export function TrialForm() {
   }
 
   if (access) return <div className="trial-card access-card" id="teste">
-    <div className="access-success-head"><span className="access-check" aria-hidden="true">✓</span><div><p className="card-eyebrow">TESTE CRIADO</p><h2 ref={successHeadingRef} tabIndex={-1}>Seu acesso está pronto</h2></div></div>
+    <div className="access-success-head"><span className="access-check" aria-hidden="true"><Check size={22} strokeWidth={2.8}/></span><div><p className="card-eyebrow">TESTE CRIADO</p><h2 ref={successHeadingRef} tabIndex={-1}>Seu acesso está pronto</h2></div></div>
     <p className="access-lead">Guarde seu usuário e sua senha para entrar no Zappy.</p>
     <div className="access-credentials">
       <div className="trial-credential"><span>Usuário</span><strong>{access.username}</strong></div>
       <div className="trial-credential"><span>Senha</span><div className="password-row"><strong>{showPassword ? access.password : "•".repeat(access.password.length)}</strong><button type="button" className="password-toggle" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} aria-pressed={showPassword}>{showPassword ? "Ocultar" : "Mostrar"}</button></div></div>
     </div>
-    {access.expiresAt && <div className="access-expiry"><span aria-hidden="true">◷</span><div><small>Teste válido até</small><strong>{new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(access.expiresAt))}</strong></div></div>}
-    <button type="button" className="access-copy" onClick={async () => { try { await navigator.clipboard.writeText(`Login: ${access.username}\nSenha: ${access.password}`); setCopied(true); setError(""); } catch { setError("Não foi possível copiar automaticamente. Toque em Mostrar e anote a senha."); } }}>{copied ? "✓ Dados copiados" : "Copiar usuário e senha"}</button>
+    {access.expiresAt && <div className="access-expiry"><Clock3 size={20} strokeWidth={1.9} aria-hidden="true"/><div><small>Teste válido até</small><strong>{new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(access.expiresAt))}</strong></div></div>}
+    <button type="button" className="access-copy" onClick={async () => { try { await navigator.clipboard.writeText(`Login: ${access.username}\nSenha: ${access.password}`); setCopied(true); setError(""); } catch { setError("Não foi possível copiar automaticamente. Toque em Mostrar e anote a senha."); } }}>{copied ? <><Check size={18} aria-hidden="true"/> Dados copiados</> : "Copiar usuário e senha"}</button>
     {error && <p className="trial-error" role="alert">{error}</p>}
     <div className="access-next"><h3>Comece a assistir</h3><p>Copie os dados acima, escolha onde abrir o Zappy e faça login.</p></div>
     <div className="access-destinations">
-      <a href={access.login} target="_blank" rel="noopener noreferrer">🌐 Entrar pelo navegador <span aria-hidden="true">↗</span></a>
-      <a href={access.android} target="_blank" rel="noopener noreferrer"><span className="access-label"><YellowRobot/> Baixar app Android</span><span aria-hidden="true">↗</span></a>
-      <a href="https://onzappy.com" target="_blank" rel="noopener noreferrer">🍎 Abrir no iPhone <span aria-hidden="true">↗</span></a>
+      <a href={access.login} target="_blank" rel="noopener noreferrer"><span className="access-link-label"><span className="access-platform-icon"><Globe2 size={19} strokeWidth={1.9}/></span>Entrar pelo navegador</span><ArrowUpRight className="access-link-arrow" size={18} aria-hidden="true"/></a>
+      <a href={access.android} target="_blank" rel="noopener noreferrer"><span className="access-link-label"><span className="access-platform-icon"><Download size={19} strokeWidth={1.9}/></span>Baixar app Android</span><ArrowUpRight className="access-link-arrow" size={18} aria-hidden="true"/></a>
+      <a href="https://onzappy.com" target="_blank" rel="noopener noreferrer"><span className="access-link-label"><span className="access-platform-icon"><Smartphone size={19} strokeWidth={1.9}/></span>Abrir no iPhone</span><ArrowUpRight className="access-link-arrow" size={18} aria-hidden="true"/></a>
     </div>
   </div>;
   return <><div className="trial-card" id="teste">
@@ -135,9 +135,9 @@ export function TrialForm() {
   </div>
     <p className="platform-title">Assista onde preferir</p>
     <nav className="platform-links" aria-label="Onde assistir ao Zappy">
-      <a href="https://onzappy.com/download" target="_blank" rel="noopener noreferrer"><YellowRobot/> Android</a>
-      <a href="https://onzappy.com/login" target="_blank" rel="noopener noreferrer">🌐 Navegador</a>
-      <a href="https://onzappy.com" target="_blank" rel="noopener noreferrer">🍎 iPhone</a>
+      <a href="https://onzappy.com/download" target="_blank" rel="noopener noreferrer"><Download size={18} strokeWidth={1.9} aria-hidden="true"/> Android</a>
+      <a href="https://onzappy.com/login" target="_blank" rel="noopener noreferrer"><Globe2 size={18} strokeWidth={1.9} aria-hidden="true"/> Navegador</a>
+      <a href="https://onzappy.com" target="_blank" rel="noopener noreferrer"><Smartphone size={18} strokeWidth={1.9} aria-hidden="true"/> iPhone</a>
     </nav>
   </>;
 }

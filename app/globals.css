@@ -227,6 +227,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .dashboard-history th, .dashboard-history td { padding: 11px 9px; border-top: 1px solid #36363b; white-space: nowrap; }
 .dashboard-history td:nth-child(2) { font-weight: 700; }
 
+.dashboard-search { display: grid; gap: 7px; margin: 4px 0 18px; }
+.dashboard-search label { color: #bcbcc4; font-size: 13px; font-weight: 700; }
+.dashboard-search > div { display: flex; flex-wrap: wrap; gap: 8px; }
+.dashboard-search input { flex: 1 1 190px; min-width: 0; min-height: 42px; padding: 8px 11px; border: 1px solid #686871; border-radius: 8px; background: #222228; color: #fff; }
+.dashboard-search button { min-height: 42px; padding: 8px 13px; border: 1px solid #55555d; border-radius: 8px; background: #303036; color: #fff; font-weight: 750; cursor: pointer; }
+.dashboard-search button[type="submit"] { border-color: #dc1b2b; background: #df1424; }
+.dashboard-search button:disabled { opacity: .65; cursor: wait; }
 .dashboard-mobile-list { display: none; }
 .dashboard-mobile-card { list-style: none; }
 .dashboard-mobile-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }

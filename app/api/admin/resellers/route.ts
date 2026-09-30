@@ -2,7 +2,7 @@ import { env } from "cloudflare:workers";
 
 const base = "https://onzappy.com/api/v1/reseller";
 const headers = { "Cache-Control": "no-store" };
-type Input = { action?: unknown; page?: unknown; username?: unknown; password?: unknown; displayName?: unknown; whatsapp?: unknown; resellerId?: unknown; amount?: unknown; notes?: unknown; confirmation?: unknown };
+type Input = { action?: unknown; page?: unknown; resellerId?: unknown; amount?: unknown; notes?: unknown; confirmation?: unknown };
 
 async function authorized(request: Request) {
   if (!env.ADMIN_DASHBOARD_KEY || !env.ZAPPY_API_KEY) return "Painel ainda não configurado.";
@@ -57,17 +57,6 @@ export async function POST(request: Request) {
       const data = await zappy("/credits/transactions?page=" + page) as { transactions?: unknown; pagination?: unknown };
       if (!Array.isArray(data.transactions)) throw new Error("Resposta inesperada da Zappy.");
       return Response.json({ transactions: data.transactions, pagination: data.pagination }, { headers });
-    }
-    if (action === "create") {
-      const username = String(input.username ?? "").trim().toLowerCase();
-      const password = String(input.password ?? "");
-      const displayName = String(input.displayName ?? "").trim();
-      const whatsapp = String(input.whatsapp ?? "").trim();
-      if (!/^[a-z0-9_]{4,32}$/.test(username) || password.length < 6 || password.length > 100 || displayName.length < 3 || displayName.length > 90 || (whatsapp && !/^\d{10,15}$/.test(whatsapp))) {
-        return Response.json({ error: "Confira usuário, senha, nome comercial e WhatsApp." }, { status: 400, headers });
-      }
-      const data = await zappy("/resellers", { username, password, displayName, ...(whatsapp ? { whatsapp } : {}) });
-      return Response.json({ created: data }, { headers });
     }
     if (action === "transfer" || action === "recall") {
       const resellerId = String(input.resellerId ?? "").trim();

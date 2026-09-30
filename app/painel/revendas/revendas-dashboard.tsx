@@ -20,10 +20,6 @@ export function RevendasDashboard() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [whatsapp, setWhatsapp] = useState("");
   const [selected, setSelected] = useState("");
   const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
@@ -64,21 +60,6 @@ export function RevendasDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function create(event: React.FormEvent) {
-    event.preventDefault();
-    if (busy) return;
-    if (!window.confirm(`Criar a sub-revenda ${displayName} (${username}) sob sua conta? A conta começa sem créditos.`)) return;
-    setBusy(true); setError(""); setMessage("");
-    try {
-      await request("create", { username, password, displayName, whatsapp });
-      setPassword(""); setUsername(""); setDisplayName(""); setWhatsapp("");
-      setMessage("Conta criada pela Zappy. Entregue a senha ao revendedor e confira a conta na lista.");
-      const accounts = await request("list");
-      setResellers(accounts.resellers as Reseller[]);
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "A Zappy não confirmou. Confira no painel antes de repetir."); }
-    finally { setBusy(false); }
-  }
-
   async function move(event: React.FormEvent) {
     event.preventDefault();
     if (busy) return;
@@ -116,15 +97,9 @@ export function RevendasDashboard() {
       {resellers.length ? <ul className="reseller-admin-list">{resellers.map(item => <li key={item.id}><div><strong>{item.displayName}</strong><span>@{item.username} · {item.status} · nível {item.depth}</span></div><b>{item.creditsBalance} crédito(s)</b></li>)}</ul> : <p>Nenhuma sub-revenda encontrada.</p>}
     </section>
     <section className="dashboard-history">
-      <h2>Criar sub-revenda</h2>
-      <p className="dashboard-note">A conta é criada sob sua revenda, sem créditos. Guarde a senha escolhida e entregue-a ao novo revendedor por um canal privado.</p>
-      <form className="reseller-admin-form" onSubmit={create}>
-        <label>Nome comercial<input value={displayName} onChange={event => setDisplayName(event.target.value)} minLength={3} maxLength={90} required /></label>
-        <label>Usuário<input value={username} onChange={event => setUsername(event.target.value)} minLength={4} maxLength={32} pattern="[a-zA-Z0-9_]+" autoComplete="off" required /></label>
-        <label>Senha inicial<input value={password} onChange={event => setPassword(event.target.value)} type="password" minLength={6} maxLength={100} autoComplete="new-password" required /></label>
-        <label>WhatsApp (opcional)<input value={whatsapp} onChange={event => setWhatsapp(event.target.value)} placeholder="5511999999999" inputMode="numeric" /></label>
-        <button type="submit" disabled={busy}>Criar sub-revenda</button>
-      </form>
+      <h2>Cadastro de novos revendedores</h2>
+      <p>A própria pessoa cria a conta na Zappy pelo seu convite. Ela começa com 0 créditos e sem testes até você carregar.</p>
+      <a className="reseller-admin-entry" href="/revenda">Ver página pública de revenda →</a>
     </section>
     <section className="dashboard-history">
       <h2>Movimentar créditos</h2>
@@ -139,7 +114,10 @@ export function RevendasDashboard() {
     </section>
     <section className="dashboard-history">
       <h2>Movimentações</h2>
-      {transactions.length ? <div className="dashboard-table-wrap reseller-admin-transactions"><table><thead><tr><th>Data</th><th>Tipo</th><th>Quantidade</th><th>Saldo anterior</th><th>Saldo depois</th></tr></thead><tbody>{transactions.map(item => <tr key={item.id}><td>{date(item.createdAt)}</td><td>{item.type}</td><td>{item.amount}</td><td>{item.balanceBefore}</td><td>{item.balanceAfter}</td></tr>)}</tbody></table></div> : <p>Sem movimentações nesta página.</p>}
+      {transactions.length ? <ul className="reseller-admin-transactions-list">{transactions.map(item => <li key={item.id}>
+        <div className="reseller-admin-transaction-head"><strong>{({ USER_RENEWAL: "Renovação", USER_ACTIVATION: "Ativação", RESELLER_TRANSFER: "Transferência", RESELLER_RECALL: "Recolhimento" } as Record<string, string>)[item.type] ?? item.type.replaceAll("_", " ")}</strong><span>{date(item.createdAt)}</span></div>
+        <div className="reseller-admin-transaction-details"><span>Quantidade: <b>{item.amount}</b></span><span>Saldo: {item.balanceBefore} → <b>{item.balanceAfter}</b></span></div>
+      </li>)}</ul> : <p>Sem movimentações nesta página.</p>}
       <div className="reseller-admin-pagination"><button type="button" disabled={busy || pagination.page <= 1} onClick={() => void load(key, pagination.page - 1)}>Anterior</button><span>Página {pagination.page} · {pagination.total} registros</span><button type="button" disabled={busy || pagination.page * pagination.limit >= pagination.total} onClick={() => void load(key, pagination.page + 1)}>Próxima</button></div>
     </section>
   </div>;

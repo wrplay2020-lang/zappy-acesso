@@ -92,8 +92,8 @@ export function Dashboard() {
 
   useEffect(() => {
     let active = true;
-    void fetch("/api/admin/session", { cache: "no-store" }).then(response => response.json()).then((body: { authenticated?: boolean }) => {
-      if (active && body.authenticated) void load();
+    void fetch("/api/admin/session", { cache: "no-store" }).then(response => response.json()).then(body => {
+      if (active && (body as { authenticated?: boolean }).authenticated) void load();
       else if (active) setRestoring(false);
     }).catch(() => { if (active) setRestoring(false); });
     return () => { active = false; };

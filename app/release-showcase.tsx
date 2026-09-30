@@ -60,11 +60,10 @@ export function ReleaseShowcase() {
   </a>{catalogUnavailable && <p role="status" className="release-unavailable">Lançamentos indisponíveis no momento. Tentaremos atualizar automaticamente.</p>}</div>;
 
   const item = items[current] ?? items[0];
-  const published = item.publishedAt && !Number.isNaN(Date.parse(item.publishedAt)) ? new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "America/Sao_Paulo" }).format(new Date(item.publishedAt)) : null;
   return <div className="release-showcase" aria-label="Lançamentos do Zappy" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocusCapture={() => setPaused(true)} onBlurCapture={() => setPaused(false)} onTouchStart={() => setPaused(true)} onTouchEnd={() => setPaused(false)} onTouchCancel={() => setPaused(false)}>
     <a className="release-link" href={item.url} target="_blank" rel="noopener noreferrer">
       <img className="release-cover" src={item.coverUrl} alt="" decoding="async" fetchPriority={current === 0 ? "high" : "auto"} onError={event => { if (!event.currentTarget.src.endsWith("/zappy-novidades.jpg")) event.currentTarget.src = "/zappy-novidades.jpg"; }}/>
-      <span className="release-caption"><span className="release-badge">LANÇAMENTOS</span><strong>{item.title}</strong><span className="release-category">{item.categories.join(" · ")}{published && <>{item.categories.length ? " · " : ""}Publicado em {published}</>}</span><span className="release-action">Ver no Zappy ↗</span></span>
+      <span className="release-caption"><span className="release-badge">LANÇAMENTOS</span><strong>{item.title}</strong><span className="release-category">{item.categories.join(" · ")}</span><span className="release-action">Ver no Zappy ↗</span></span>
     </a>
   </div>;
 }

@@ -26,6 +26,8 @@ export function TrialForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [usernameTaken, setUsernameTaken] = useState(false);
   const usernameRef = useRef<HTMLInputElement>(null);
+  const successHeadingRef = useRef<HTMLHeadingElement>(null);
+  const submittingRef = useRef(false);
   const widgetRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [siteKey, setSiteKey] = useState<string | null>(null);
@@ -57,12 +59,16 @@ export function TrialForm() {
     return () => { cancelled = true; if (widgetIdRef.current) { window.turnstile?.remove(widgetIdRef.current); widgetIdRef.current = null; } };
   }, [siteKey]);
 
+  useEffect(() => { if (access) successHeadingRef.current?.focus(); }, [access]);
+
   async function create(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submittingRef.current) return;
     if (!securityReady || securityError || (siteKey && !turnstileToken)) {
       setError("Aguarde a verificação de segurança antes de criar o teste.");
       return;
     }
+    submittingRef.current = true;
     setBusy(true); setError(""); setUsernameTaken(false);
     const data = new FormData(event.currentTarget);
     try {
@@ -88,13 +94,14 @@ export function TrialForm() {
     } catch (cause) {
       setError(cause instanceof TypeError ? "A conexão caiu. Verifique sua internet e aguarde alguns minutos antes de tentar novamente." : cause instanceof Error ? cause.message : "Tente novamente mais tarde.");
     } finally {
+      submittingRef.current = false;
       setBusy(false);
       if (siteKey && widgetIdRef.current) { window.turnstile?.reset(widgetIdRef.current); setTurnstileToken(""); }
     }
   }
 
   if (access) return <div className="trial-card access-card" id="teste">
-    <p className="card-eyebrow">TUDO PRONTO</p><h2>Seu teste está ativo</h2>
+    <p className="card-eyebrow">TUDO PRONTO</p><h2 ref={successHeadingRef} tabIndex={-1}>Seu teste está ativo</h2>
     <p>Guarde estes dados. Você vai usá-los para entrar no Zappy.</p>
     <div className="trial-credential"><span>Usuário</span><strong>{access.username}</strong></div>
     <div className="trial-credential"><span>Senha</span><div className="password-row"><strong>{showPassword ? access.password : "•".repeat(access.password.length)}</strong><button type="button" className="password-toggle" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} aria-pressed={showPassword}>{showPassword ? "Ocultar" : "Mostrar"}</button></div></div>

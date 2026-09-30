@@ -34,6 +34,12 @@ export async function POST(request: Request) {
   }
   const db = env.DB;
   const ipHash = ip ? await hash(ip + env.ZAPPY_API_KEY) : "unknown";
+  const pending = await db.prepare("SELECT id FROM trial_requests WHERE username = ? AND status = 'CREATING' AND created_at > ? LIMIT 1")
+    .bind(username, Date.now() - 2 * 60 * 1000).first<{ id: string }>();
+  if (pending) return Response.json({
+    code: "trial_unconfirmed",
+    error: "Já existe uma tentativa recente com esse usuário. Aguarde dois minutos e confira se o acesso foi criado antes de enviar outro pedido.",
+  }, { status: 409, headers: { "Cache-Control": "no-store" } });
   const id = crypto.randomUUID();
   const random = Array.from(crypto.getRandomValues(new Uint8Array(8)), byte => byte.toString(36).padStart(2, "0")).join("");
   const password = "Zp@" + random;
@@ -66,7 +72,9 @@ export async function POST(request: Request) {
       const unavailable = body.error?.code === "trial_limit_reached" || response.status === 429;
       return Response.json({ error: unavailable ? "Os testes de hoje acabaram. Volte amanhã." : "Não foi possível criar o teste. Tente novamente." }, { status: unavailable ? 429 : 502 });
     }
-    await db.prepare("UPDATE trial_requests SET status = 'CREATED' WHERE id = ?").bind(id).run();
+    // A falha do registro local não transforma um teste confirmado pela Zappy em falha.
+    await db.prepare("UPDATE trial_requests SET status = 'CREATED', failure_code = NULL WHERE id = ?").bind(id).run()
+      .catch(error => console.error("trial_created_db_update_failed", id, error));
     return Response.json({
       username: body.data.username ?? username,
       password: body.data.password ?? password,
@@ -75,9 +83,9 @@ export async function POST(request: Request) {
       android: body.data.links?.android ?? "https://onzappy.com/download",
     }, { status: 201, headers: { "Cache-Control": "no-store" } });
   } catch {
-    // A timeout can still create a trial remotely; count it against this IP.
+    // Uma falha de rede ou uma resposta ilegível pode acontecer após a criação remota.
     await db.prepare("UPDATE trial_requests SET failure_code = 'unconfirmed' WHERE id = ?").bind(id).run().catch(() => {});
-    return Response.json({ error: "Não conseguimos confirmar o teste. Aguarde um pouco antes de tentar de novo." }, { status: 502 });
+    return Response.json({ code: "trial_unconfirmed", error: "A Zappy não confirmou a resposta. Aguarde dois minutos e confira se o usuário já consegue entrar antes de tentar novamente." }, { status: 502, headers: { "Cache-Control": "no-store" } });
   }
 }
 

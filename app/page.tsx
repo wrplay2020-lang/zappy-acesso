@@ -12,7 +12,12 @@ export default function Home() {
       <div className="hero-copy">
         <p className="eyebrow">NOVELINHAS NO CELULAR</p>
         <h1 id="page-title">Sua próxima história <em>começa aqui.</em></h1>
-        <p className="intro">Crie seu acesso e assista grátis por 24 horas.</p>
+        <p className="intro">Descubra histórias de romance, drama e suspense em episódios curtos.</p>
+        <ul className="site-highlights" aria-label="Destaques do Zappy">
+          <li><strong>Milhares de novelinhas</strong><span>para descobrir</span></li>
+          <li><strong>Assista no celular</strong><span>onde preferir</span></li>
+          <li><strong>Teste grátis</strong><span>por 24 horas</span></li>
+        </ul>
         <TrialForm/>
         <p className="after-trial">Gostou? Adicione 30 dias por <strong>R$ 20 via Pix</strong> dentro do app.</p>
       </div>

@@ -46,7 +46,10 @@ export async function POST(request: Request) {
         whatsapp: byId.get(String(item.id ?? "")) ?? pendingByUsername.get(String(item.username ?? "")) ?? (typeof item.whatsapp === "string" && /^\d{10,15}$/.test(item.whatsapp) ? item.whatsapp : ""),
         contactPending: !byId.has(String(item.id ?? "")) && pendingByUsername.has(String(item.username ?? "")),
       }));
-      return Response.json({ resellers }, { headers });
+      const signupAttempts = await env.DB.prepare("SELECT username, status, created_at FROM reseller_signup_attempts ORDER BY created_at DESC LIMIT 25")
+        .all<{ username: string; status: string; created_at: number }>()
+        .then(result => result.results).catch(() => []);
+      return Response.json({ resellers, signupAttempts }, { headers });
     }
     if (action === "saveContact") {
       const resellerId = String(input.resellerId ?? "").trim();

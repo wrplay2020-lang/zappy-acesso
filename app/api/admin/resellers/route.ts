@@ -76,7 +76,7 @@ export async function POST(request: Request) {
       const resellerId = String(input.resellerId ?? "").trim();
       const amount = Number(input.amount);
       const notes = String(input.notes ?? "").trim();
-      if (!/^cl[a-zA-Z0-9_-]{5,80}$/.test(resellerId) || !Number.isSafeInteger(amount) || amount < 1 || amount > 100000 || notes.length > 150 || input.confirmation !== (action === "transfer" ? "TRANSFERIR" : "RECOLHER")) {
+      if ((!resellerId || resellerId.length > 100) || !Number.isSafeInteger(amount) || amount < 1 || amount > 100000 || notes.length > 150 || input.confirmation !== (action === "transfer" ? "TRANSFERIR" : "RECOLHER")) {
         return Response.json({ error: "Confira a revenda, o valor e a confirmação." }, { status: 400, headers });
       }
       const list = await zappy("/resellers") as { resellers?: { id?: string }[] };

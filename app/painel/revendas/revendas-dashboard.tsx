@@ -6,6 +6,7 @@ type Reseller = { id: string; username: string; displayName: string; creditsBala
 type SignupAttempt = { username: string; status: string; created_at: number };
 type Transaction = { id: string; type: string; amount: number; balanceBefore: number; balanceAfter: number; createdAt: string };
 type Page = { page: number; limit: number; total: number };
+type PendingMove = { resellerId: string; amount: number; notes: string; kind: "transfer" | "recall" };
 const date = (value: string) => {
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? "—" : new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(parsed);
@@ -25,6 +26,7 @@ export function RevendasDashboard() {
   const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
   const [kind, setKind] = useState<"transfer" | "recall">("transfer");
+  const [pendingMove, setPendingMove] = useState<PendingMove | null>(null);
   const [contactId, setContactId] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [search, setSearch] = useState("");
@@ -91,24 +93,40 @@ export function RevendasDashboard() {
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Não foi possível sair."); }
   }
 
-  async function move(event: React.FormEvent) {
+  function prepareMove(event: React.FormEvent) {
     event.preventDefault();
     if (busy) return;
     const reseller = resellers?.find(item => item.id === selected);
-    const verb = kind === "transfer" ? "TRANSFERIR" : "RECOLHER";
-    if (!reseller || !window.confirm(`${verb} ${amount} crédito(s) ${kind === "transfer" ? "para" : "de"} ${reseller.displayName} (${reseller.username})? Esta operação altera o saldo.`)) return;
-    setBusy(true); setError(""); setMessage("");
+    const quantity = Number(amount);
+    if (!reseller || !Number.isSafeInteger(quantity) || quantity < 1) {
+      setError("Selecione a revenda e informe uma quantidade válida.");
+      return;
+    }
+    setError(""); setMessage("");
+    setPendingMove({ resellerId: reseller.id, amount: quantity, notes, kind });
+  }
+
+  async function confirmMove() {
+    const pending = pendingMove;
+    if (!pending || busy) return;
+    const reseller = resellers?.find(item => item.id === pending.resellerId);
+    if (!reseller) { setPendingMove(null); setError("Revenda não encontrada. Atualize a lista."); return; }
+    setBusy(true); setError(""); setMessage(""); setPendingMove(null);
     try {
-      await request(kind, { resellerId: selected, amount: Number(amount), notes, confirmation: verb });
-      setMessage("A Zappy confirmou a movimentação. Consulte o histórico abaixo.");
+      await request(pending.kind, {
+        resellerId: pending.resellerId, amount: pending.amount, notes: pending.notes,
+        confirmation: pending.kind === "transfer" ? "TRANSFERIR" : "RECOLHER",
+      });
+      setMessage("A Zappy confirmou a movimentação. Consulte o saldo e o histórico abaixo.");
       setAmount(""); setNotes("");
       const [accounts, history] = await Promise.all([request("list"), request("transactions", { page: 1 })]);
       setResellers(accounts.resellers as Reseller[]);
       setSignupAttempts((accounts.signupAttempts as SignupAttempt[]) ?? []);
       setTransactions(history.transactions as Transaction[]);
       setPagination(history.pagination as Page);
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "A Zappy não confirmou. Confira no painel antes de repetir."); }
-    finally { setBusy(false); }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "A Zappy não confirmou. Confira o saldo e o histórico antes de repetir.");
+    } finally { setBusy(false); }
   }
 
   async function saveContact(event: React.FormEvent) {
@@ -184,14 +202,19 @@ export function RevendasDashboard() {
     </section>
     <section className="dashboard-history">
       <h2>Movimentar créditos</h2>
-      <form className="reseller-admin-form" onSubmit={move}>
+      <form className="reseller-admin-form" onSubmit={prepareMove}>
         <label>Operação<select value={kind} onChange={event => setKind(event.target.value as "transfer" | "recall")}><option value="transfer">Transferir créditos</option><option value="recall">Recolher créditos</option></select></label>
         <label>Sub-revenda<select value={selected} onChange={event => setSelected(event.target.value)} required><option value="">Selecione</option>{resellers.map(item => <option key={item.id} value={item.id}>{item.displayName} (@{item.username}) · {item.creditsBalance} créditos</option>)}</select></label>
         <label>Quantidade<input value={amount} onChange={event => setAmount(event.target.value)} type="number" min={1} max={100000} step={1} required /></label>
         <label>Observação (opcional)<input value={notes} onChange={event => setNotes(event.target.value)} maxLength={150} /></label>
-        <button type="submit" disabled={busy || !resellers.length}>{kind === "transfer" ? "Transferir créditos" : "Recolher créditos"}</button>
+        <button type="submit" disabled={busy || !resellers.length}>{kind === "transfer" ? "Revisar transferência" : "Revisar recolhimento"}</button>
       </form>
-      <p className="dashboard-note">Confirme a sub-revenda e a quantidade antes de enviar. Se a resposta falhar, confira a movimentação na Zappy antes de repetir.</p>
+      {pendingMove && <div className="reseller-admin-confirm" role="group" aria-label="Confirmação da movimentação">
+        <strong>Confirme os dados</strong>
+        <p>{pendingMove.kind === "transfer" ? "Transferir" : "Recolher"} <b>{pendingMove.amount} crédito(s)</b> {pendingMove.kind === "transfer" ? "para" : "de"} <b>{resellers.find(item => item.id === pendingMove.resellerId)?.displayName ?? "revenda selecionada"}</b> (@{resellers.find(item => item.id === pendingMove.resellerId)?.username ?? ""}).</p>
+        <div><button type="button" disabled={busy} onClick={() => void confirmMove()}>{busy ? "Enviando…" : pendingMove.kind === "transfer" ? "Confirmar transferência" : "Confirmar recolhimento"}</button><button type="button" disabled={busy} onClick={() => setPendingMove(null)}>Cancelar</button></div>
+      </div>}
+      <p className="dashboard-note">Confira a revenda e a quantidade na etapa de confirmação. Se a resposta falhar, verifique o saldo e o histórico na Zappy antes de repetir.</p>
     </section>
     <section className="dashboard-history">
       <h2>Movimentações</h2>

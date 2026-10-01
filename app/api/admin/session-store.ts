@@ -35,6 +35,7 @@ export async function authorized(request: Request) {
 
 export async function createSession() {
   await ensureTable();
+  await env.DB!.prepare("DELETE FROM admin_sessions WHERE expires_at <= ?").bind(Date.now()).run();
   const token = Array.from(crypto.getRandomValues(new Uint8Array(32)), byte => byte.toString(16).padStart(2, "0")).join("");
   await env.DB!.prepare("INSERT INTO admin_sessions (token_hash, expires_at) VALUES (?, ?)").bind(await digest(token), Date.now() + lifetime).run();
   return `${cookieName}=${token}; HttpOnly; Secure; SameSite=Strict; Path=/api/admin; Max-Age=${lifetime / 1000}`;

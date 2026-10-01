@@ -507,3 +507,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .reseller-admin-search small { color: #a8a8b1; font-size: 12px; }
 
 .reseller-admin-search select { width: 100%; min-height: 44px; padding: 9px 12px; border: 1px solid #5c5c65; border-radius: 9px; background: #222227; color: #fff; font-size: 16px; }
+
+.reseller-admin-confirm { margin: 18px 0; padding: 18px; border: 1px solid #e85967; border-radius: 12px; background: #2d1c22; color: #f7f7f8; }
+.reseller-admin-confirm > strong { font-size: 17px; }
+.reseller-admin-confirm p { margin: 9px 0 16px; line-height: 1.5; overflow-wrap: anywhere; }
+.reseller-admin-confirm > div { display: flex; flex-wrap: wrap; gap: 10px; }
+.reseller-admin-confirm button { min-height: 44px; padding: 10px 15px; border: 1px solid #e3182c; border-radius: 9px; background: #df1424; color: #fff; font-weight: 750; cursor: pointer; }
+.reseller-admin-confirm button + button { border-color: #6a6267; background: #343035; }
+.reseller-admin-confirm button:disabled { opacity: .6; cursor: wait; }
+@media (max-width: 480px) { .reseller-admin-confirm > div { display: grid; } .reseller-admin-confirm button { width: 100%; } }

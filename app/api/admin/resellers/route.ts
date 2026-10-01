@@ -22,6 +22,10 @@ async function zappy(path: string, payload?: Record<string, unknown>, idempotenc
   return body.data;
 }
 
+async function ensureMovementTable() {
+  await env.DB!.prepare("CREATE TABLE IF NOT EXISTS reseller_credit_movements (transaction_id TEXT PRIMARY KEY, reseller_id TEXT NOT NULL, username TEXT NOT NULL, display_name TEXT NOT NULL, action TEXT NOT NULL, amount INTEGER NOT NULL, created_at INTEGER NOT NULL)").run();
+}
+
 export async function POST(request: Request) {
   if (!env.ADMIN_DASHBOARD_KEY || !env.ZAPPY_API_KEY || !env.DB) return Response.json({ error: "Painel ainda não configurado." }, { status: 503, headers });
   if (request.headers.get("Origin") !== new URL(request.url).origin) return Response.json({ error: "Solicitação inválida." }, { status: 403, headers });
@@ -70,7 +74,23 @@ export async function POST(request: Request) {
       if (!Number.isInteger(page) || page < 1 || page > 10000) return Response.json({ error: "Página inválida." }, { status: 400, headers });
       const data = await zappy("/credits/transactions?page=" + page) as { transactions?: unknown; pagination?: unknown };
       if (!Array.isArray(data.transactions)) throw new Error("Resposta inesperada da Zappy.");
-      return Response.json({ transactions: data.transactions, pagination: data.pagination }, { headers });
+      const transactions = data.transactions as Record<string, unknown>[];
+      let saved = new Map<string, { reseller_id: string; username: string; display_name: string }>();
+      try {
+        await ensureMovementTable();
+        const ids = transactions.map(item => String(item.id ?? "")).filter(Boolean);
+        if (ids.length) {
+          const rows = await env.DB.prepare("SELECT transaction_id, reseller_id, username, display_name FROM reseller_credit_movements WHERE transaction_id IN (" + ids.map(() => "?").join(",") + ")")
+            .bind(...ids).all<{ transaction_id: string; reseller_id: string; username: string; display_name: string }>();
+          saved = new Map(rows.results.map(item => [item.transaction_id, item]));
+        }
+      } catch (error) { console.error("reseller_movement_history_unavailable", error); }
+      const annotated = transactions.map(item => {
+        const local = saved.get(String(item.id ?? ""));
+        const providerId = [item.toResellerId, item.fromResellerId, item.resellerId].find(value => typeof value === "string") as string | undefined;
+        return { ...item, resellerId: local?.reseller_id ?? providerId ?? "", resellerUsername: local?.username ?? "", resellerDisplayName: local?.display_name ?? "" };
+      });
+      return Response.json({ transactions: annotated, pagination: data.pagination }, { headers });
     }
     if (action === "transfer" || action === "recall") {
       const resellerId = String(input.resellerId ?? "").trim();
@@ -79,12 +99,23 @@ export async function POST(request: Request) {
       if ((!resellerId || resellerId.length > 100) || !Number.isSafeInteger(amount) || amount < 1 || amount > 100000 || notes.length > 150 || input.confirmation !== (action === "transfer" ? "TRANSFERIR" : "RECOLHER")) {
         return Response.json({ error: "Confira a revenda, o valor e a confirmação." }, { status: 400, headers });
       }
-      const list = await zappy("/resellers") as { resellers?: { id?: string }[] };
-      if (!Array.isArray(list.resellers) || !list.resellers.some(item => item.id === resellerId)) return Response.json({ error: "Esta sub-revenda não consta na sua lista." }, { status: 400, headers });
+      const list = await zappy("/resellers") as { resellers?: { id?: string; username?: string; displayName?: string }[] };
+      const reseller = list.resellers?.find(item => item.id === resellerId);
+      if (!reseller) return Response.json({ error: "Esta sub-revenda não consta na sua lista." }, { status: 400, headers });
+      await ensureMovementTable();
       const path = action === "transfer" ? "/credits/transfer" : "/credits/recall";
       const payload = action === "transfer" ? { toResellerId: resellerId, amount, ...(notes ? { notes } : {}) } : { fromResellerId: resellerId, amount, ...(notes ? { notes } : {}) };
-      const data = await zappy(path, payload);
-      return Response.json({ transaction: data }, { headers });
+      const data = await zappy(path, payload) as { transactionId?: unknown };
+      const transactionId = typeof data.transactionId === "string" ? data.transactionId : "";
+      let recipientRecorded = false;
+      if (transactionId) {
+        try {
+          await env.DB.prepare("INSERT INTO reseller_credit_movements (transaction_id, reseller_id, username, display_name, action, amount, created_at) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(transaction_id) DO NOTHING")
+            .bind(transactionId, resellerId, String(reseller.username ?? ""), String(reseller.displayName ?? ""), action, amount, Date.now()).run();
+          recipientRecorded = true;
+        } catch (error) { console.error("reseller_movement_recipient_save_failed", transactionId, error); }
+      }
+      return Response.json({ transaction: data, recipientRecorded }, { headers });
     }
     return Response.json({ error: "Ação inválida." }, { status: 400, headers });
   } catch (error) {

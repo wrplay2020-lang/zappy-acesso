@@ -488,6 +488,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 @media (max-width: 390px) { .dashboard-switch > * { min-height: 44px; font-size: 14px; } }
 
 .dashboard-history .reseller-admin-list { padding-left: 0; line-height: 1.45; }
+.dashboard-history .reseller-admin-transactions-list { width: 100%; padding-left: 0; line-height: 1.45; }
 .reseller-admin-list li { min-width: 0; }
 .reseller-admin-list li > div { width: 100%; }
 .reseller-admin-contact { display: grid; justify-items: start; gap: 10px; margin-top: 14px; }

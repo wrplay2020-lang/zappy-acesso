@@ -517,3 +517,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .reseller-admin-confirm button + button { border-color: #6a6267; background: #343035; }
 .reseller-admin-confirm button:disabled { opacity: .6; cursor: wait; }
 @media (max-width: 480px) { .reseller-admin-confirm > div { display: grid; } .reseller-admin-confirm button { width: 100%; } }
+
+.reseller-admin-transaction-recipient { margin-top: 9px; padding-top: 9px; border-top: 1px solid #393940; color: #d1d1d8; font-size: 13px; line-height: 1.4; overflow-wrap: anywhere; }
+.reseller-admin-transaction-recipient strong { color: #f7f7f8; }

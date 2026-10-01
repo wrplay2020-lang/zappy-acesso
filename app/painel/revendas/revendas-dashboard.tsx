@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 type Reseller = { id: string; username: string; displayName: string; creditsBalance: number; status: string; depth: number; canCreateSubresellers: boolean; whatsapp: string; contactPending: boolean };
 type SignupAttempt = { username: string; status: string; created_at: number };
-type Transaction = { id: string; type: string; amount: number; balanceBefore: number; balanceAfter: number; createdAt: string };
+type Transaction = { id: string; type: string; amount: number; balanceBefore: number; balanceAfter: number; createdAt: string; resellerId?: string; resellerUsername?: string; resellerDisplayName?: string };
 type Page = { page: number; limit: number; total: number };
 type PendingMove = { resellerId: string; amount: number; notes: string; kind: "transfer" | "recall" };
 const date = (value: string) => {
@@ -113,17 +113,23 @@ export function RevendasDashboard() {
     if (!reseller) { setPendingMove(null); setError("Revenda não encontrada. Atualize a lista."); return; }
     setBusy(true); setError(""); setMessage(""); setPendingMove(null);
     try {
-      await request(pending.kind, {
+      const result = await request(pending.kind, {
         resellerId: pending.resellerId, amount: pending.amount, notes: pending.notes,
         confirmation: pending.kind === "transfer" ? "TRANSFERIR" : "RECOLHER",
       });
-      setMessage("A Zappy confirmou a movimentação. Consulte o saldo e o histórico abaixo.");
+      setMessage(result.recipientRecorded
+        ? "A Zappy confirmou a movimentação. A revenda aparecerá no histórico abaixo."
+        : "A Zappy confirmou a movimentação, mas não foi possível registrar a revenda no histórico. Confira o saldo antes de tentar outra operação.");
       setAmount(""); setNotes("");
-      const [accounts, history] = await Promise.all([request("list"), request("transactions", { page: 1 })]);
-      setResellers(accounts.resellers as Reseller[]);
-      setSignupAttempts((accounts.signupAttempts as SignupAttempt[]) ?? []);
-      setTransactions(history.transactions as Transaction[]);
-      setPagination(history.pagination as Page);
+      try {
+        const [accounts, history] = await Promise.all([request("list"), request("transactions", { page: 1 })]);
+        setResellers(accounts.resellers as Reseller[]);
+        setSignupAttempts((accounts.signupAttempts as SignupAttempt[]) ?? []);
+        setTransactions(history.transactions as Transaction[]);
+        setPagination(history.pagination as Page);
+      } catch {
+        setError("Movimentação confirmada. Não foi possível atualizar a lista agora; use Atualizar para conferir.");
+      }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "A Zappy não confirmou. Confira o saldo e o histórico antes de repetir.");
     } finally { setBusy(false); }
@@ -221,6 +227,10 @@ export function RevendasDashboard() {
       {transactions.length ? <ul className="reseller-admin-transactions-list">{transactions.map(item => <li key={item.id}>
         <div className="reseller-admin-transaction-head"><strong>{({ USER_RENEWAL: "Renovação", USER_ACTIVATION: "Ativação", RESELLER_TRANSFER: "Transferência", RESELLER_RECALL: "Recolhimento" } as Record<string, string>)[item.type] ?? item.type.replaceAll("_", " ")}</strong><span>{date(item.createdAt)}</span></div>
         <div className="reseller-admin-transaction-details"><span>Quantidade: <b>{item.amount}</b></span><span>Saldo: {item.balanceBefore} → <b>{item.balanceAfter}</b></span></div>
+        {(item.type === "RESELLER_TRANSFER" || item.type === "RESELLER_RECALL") && <div className="reseller-admin-transaction-recipient">Revenda: {item.resellerDisplayName || resellers.find(reseller => reseller.id === item.resellerId)?.displayName
+          ? <strong>{item.resellerDisplayName || resellers.find(reseller => reseller.id === item.resellerId)?.displayName} {item.resellerUsername || resellers.find(reseller => reseller.id === item.resellerId)?.username
+            ? `(@${item.resellerUsername || resellers.find(reseller => reseller.id === item.resellerId)?.username})` : ""}</strong>
+          : <span>não identificada neste registro</span>}</div>}
       </li>)}</ul> : <p>Sem movimentações nesta página.</p>}
       <div className="reseller-admin-pagination"><button type="button" disabled={busy || pagination.page <= 1} onClick={() => void load(key, pagination.page - 1)}>Anterior</button><span>Página {pagination.page} · {pagination.total} registros</span><button type="button" disabled={busy || pagination.page * pagination.limit >= pagination.total} onClick={() => void load(key, pagination.page + 1)}>Próxima</button></div>
     </section>

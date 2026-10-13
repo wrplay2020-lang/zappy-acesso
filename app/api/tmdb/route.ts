@@ -1,0 +1,64 @@
+import { env } from "cloudflare:workers";
+
+const allowedParams = new Set(["query", "language", "append_to_response"]);
+
+export async function GET(request: Request) {
+  const key = env.TMDB_API_KEY;
+  if (!key) {
+    return Response.json({ error: "A busca do TMDB ainda não foi configurada no servidor." }, {
+      status: 503,
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
+
+  const incoming = new URL(request.url);
+  const path = incoming.searchParams.get("path") || "";
+  if (!/^(search\/multi|movie\/\d{1,10}|tv\/\d{1,10})$/.test(path)) {
+    return Response.json({ error: "Consulta TMDB inválida." }, { status: 400 });
+  }
+
+  const target = new URL("https://api.themoviedb.org/3/" + path);
+  for (const name of allowedParams) {
+    const value = incoming.searchParams.get(name);
+    if (!value) continue;
+    if (name === "query" && value.length > 100) {
+      return Response.json({ error: "A busca aceita até 100 caracteres." }, { status: 400 });
+    }
+    if (name === "append_to_response" && value !== "images") {
+      return Response.json({ error: "Parâmetro inválido." }, { status: 400 });
+    }
+    if (name === "language" && !/^[a-z]{2}-[A-Z]{2}$/.test(value)) {
+      return Response.json({ error: "Idioma inválido." }, { status: 400 });
+    }
+    target.searchParams.set(name, value);
+  }
+  target.searchParams.set("api_key", key);
+
+  try {
+    const upstream = await fetch(target, {
+      headers: { accept: "application/json" },
+      signal: AbortSignal.timeout(12000),
+      redirect: "manual",
+    });
+    if (!upstream.ok) {
+      return Response.json(
+        { error: upstream.status === 401 ? "A chave TMDB do servidor precisa ser atualizada." : "O TMDB não conseguiu concluir a busca." },
+        { status: upstream.status === 401 ? 503 : upstream.status, headers: { "Cache-Control": "no-store" } },
+      );
+    }
+
+    return new Response(upstream.body, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "public, max-age=60, s-maxage=600, stale-while-revalidate=3600",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
+  } catch {
+    return Response.json({ error: "Não foi possível conectar ao TMDB. Tente novamente." }, {
+      status: 502,
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
+}

@@ -92,20 +92,20 @@ if(layout==='cinema'){
  if(foot){ctx.fillStyle=C.text;ctx.textAlign='center';ctx.font='900 24px system-ui';ctx.fillText(foot,W/2,1060)}attribution(1074);
 }else if(layout==='billboard'){
  const glow=ctx.createRadialGradient(950,760,20,950,760,850);glow.addColorStop(0,C.accent+'55');glow.addColorStop(1,'transparent');ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
- ctx.save();ctx.shadowColor='#000c';ctx.shadowBlur=28;ctx.fillStyle='#242128';ctx.beginPath();ctx.ellipse(950,872,600,38,0,0,Math.PI*2);ctx.fill();ctx.restore();
- ctx.fillStyle='#17171c';ctx.strokeStyle='#6d6873';ctx.lineWidth=5;roundRect(ctx,520,690,58,178,8,'#24242a','#77727b');roundRect(ctx,1340,690,58,178,8,'#24242a','#77727b');roundRect(ctx,450,850,1018,38,10,'#17171c','#6c6670');
- ctx.save();ctx.translate(185,145);ctx.transform(1,.02,.075,1,0,0);ctx.shadowColor='#000d';ctx.shadowBlur=45;
- ctx.fillStyle='#111116';ctx.beginPath();ctx.moveTo(1510,0);ctx.lineTo(1555,-24);ctx.lineTo(1555,536);ctx.lineTo(1510,560);ctx.closePath();ctx.fill();
- ctx.beginPath();ctx.moveTo(0,560);ctx.lineTo(1510,560);ctx.lineTo(1555,536);ctx.lineTo(45,536);ctx.closePath();ctx.fillStyle='#09090d';ctx.fill();
- roundRect(ctx,0,0,1510,560,24,'#101014','#bcb6c5');ctx.shadowBlur=0;
- ctx.save();ctx.beginPath();ctx.roundRect(22,22,1466,516,12);ctx.clip();if(backdropImg)imageCover(backdropImg,22,22,1466,516);else{ctx.fillStyle=C.bg;ctx.fillRect(22,22,1466,516)}ctx.fillStyle='rgba(4,5,10,.72)';ctx.fillRect(22,22,1466,516);const sheen=ctx.createLinearGradient(0,22,0,538);sheen.addColorStop(0,'rgba(255,255,255,.10)');sheen.addColorStop(.35,'rgba(255,255,255,0)');sheen.addColorStop(1,'rgba(0,0,0,.42)');ctx.fillStyle=sheen;ctx.fillRect(22,22,1466,516);ctx.restore();
- posterFrame(58,60,315,430,15);ctx.textAlign='left';ctx.fillStyle=C.text;wrapText(title,430,148,890,82,2,'900 70px system-ui',C.text,'left');
- pill(kind,430,198,210,C.accent,C.text,27);ctx.fillStyle=C.text;ctx.font='750 30px system-ui';ctx.fillText(`${year}${platform?'  •  '+platform:''}`,668,235);
- ctx.fillStyle='#ffd400';ctx.font='900 38px system-ui';ctx.fillText('★★★★★',430,301);ctx.fillStyle='#7b7377';ctx.fillText('★',590,301);ctx.fillStyle=C.text;ctx.font='800 34px system-ui';ctx.fillText(String(rating).replace('.',','),660,301);
- ctx.fillStyle=C.accent;ctx.font='900 24px system-ui';ctx.fillText('SINOPSE',430,350);ctx.globalAlpha=.96;wrapText(overview,430,392,980,38,3,'600 27px system-ui',C.text,'left');ctx.globalAlpha=1;
- roundRect(ctx,430,459,470,62,31,C.button);ctx.fillStyle=C.text;ctx.textAlign='center';ctx.font='900 25px system-ui';ctx.fillText(cta,665,499);
- if(brandPos==='top'||brandPos==='both')brandAt(1215,82,.62);if(brandPos==='footer'||brandPos==='both')brandAt(1190,520,.48);ctx.restore();
- if($('showDevices').checked)drawDevices(911,960,290,.62,18,[['phone','CELULAR'],['laptop','NOTEBOOK'],['tv','SMART TV']]);attribution(1058);
+ ctx.save();ctx.shadowColor='#000c';ctx.shadowBlur=24;ctx.fillStyle='#242128';ctx.beginPath();ctx.ellipse(950,892,580,30,0,0,Math.PI*2);ctx.fill();ctx.restore();
+ ctx.fillStyle='#17171c';ctx.strokeStyle='#6d6873';ctx.lineWidth=4;roundRect(ctx,520,785,48,105,7,'#24242a','#77727b');roundRect(ctx,1330,785,48,105,7,'#24242a','#77727b');roundRect(ctx,450,876,1018,28,8,'#17171c','#6c6670');
+ ctx.save();ctx.translate(185,105);ctx.transform(1,.018,.05,1,0,0);ctx.shadowColor='#000d';ctx.shadowBlur=38;
+ ctx.fillStyle='#111116';ctx.beginPath();ctx.moveTo(1510,0);ctx.lineTo(1550,-22);ctx.lineTo(1550,658);ctx.lineTo(1510,680);ctx.closePath();ctx.fill();
+ ctx.beginPath();ctx.moveTo(0,680);ctx.lineTo(1510,680);ctx.lineTo(1550,658);ctx.lineTo(40,658);ctx.closePath();ctx.fillStyle='#09090d';ctx.fill();
+ roundRect(ctx,0,0,1510,680,22,'#101014','#a79eaf');ctx.shadowBlur=0;
+ ctx.save();ctx.beginPath();ctx.roundRect(22,22,1466,636,12);ctx.clip();if(backdropImg)imageCover(backdropImg,22,22,1466,636);else{ctx.fillStyle=C.bg;ctx.fillRect(22,22,1466,636)}ctx.fillStyle='rgba(4,5,10,.68)';ctx.fillRect(22,22,1466,636);const sheen=ctx.createLinearGradient(0,22,0,658);sheen.addColorStop(0,'rgba(255,255,255,.10)');sheen.addColorStop(.35,'rgba(255,255,255,0)');sheen.addColorStop(1,'rgba(0,0,0,.34)');ctx.fillStyle=sheen;ctx.fillRect(22,22,1466,636);ctx.restore();
+ posterFrame(58,60,370,560,15);ctx.textAlign='left';ctx.fillStyle=C.text;wrapText(title,480,158,900,93,2,'900 82px system-ui',C.text,'left');
+ pill(kind,480,236,210,C.accent,C.text,27);ctx.fillStyle=C.text;ctx.font='750 32px system-ui';ctx.fillText(`${year}${platform?'  •  '+platform:''}`,718,273);
+ ctx.fillStyle='#ffd400';ctx.font='900 42px system-ui';ctx.fillText('★★★★★',480,356);ctx.fillStyle='#7b7377';ctx.fillText('★',656,356);ctx.fillStyle=C.text;ctx.font='800 36px system-ui';ctx.fillText(String(rating).replace('.',','),730,356);
+ ctx.fillStyle=C.accent;ctx.font='900 25px system-ui';ctx.fillText('SINOPSE',480,414);ctx.globalAlpha=.97;wrapText(overview,480,460,950,43,3,'600 31px system-ui',C.text,'left');ctx.globalAlpha=1;
+ roundRect(ctx,480,590,480,64,32,C.button);ctx.fillStyle=C.text;ctx.textAlign='center';ctx.font='900 26px system-ui';ctx.fillText(cta,720,631);
+ if(brandPos==='top'||brandPos==='both')brandAt(1215,82,.62);if(brandPos==='footer'||brandPos==='both')brandAt(1190,645,.46);ctx.restore();
+ if($('showDevices').checked)drawDevices(930,960,290,.7,20,[['phone','CELULAR'],['laptop','NOTEBOOK'],['tv','SMART TV']]);attribution(1058);
 }else{
  topLogo(155,1.03);pill(year,60,260,235,C.accent,C.text,30);pill(kind,765,270,230,C.accent,C.text,30);
  ctx.textAlign='left';wrapText(title,60,430,540,76,3,'900 61px system-ui',C.text,'left');

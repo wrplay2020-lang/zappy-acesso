@@ -1,8 +1,29 @@
 import { env } from "cloudflare:workers";
 
 const allowedParams = new Set(["query", "language", "append_to_response"]);
+const requestCounts = new Map<string, { count: number; expires: number }>();
+
+function overLimit(ip: string) {
+  const now = Date.now();
+  for (const [key, value] of requestCounts) if (value.expires <= now) requestCounts.delete(key);
+  const current = requestCounts.get(ip);
+  if (!current || current.expires <= now) {
+    requestCounts.set(ip, { count: 1, expires: now + 60_000 });
+    return false;
+  }
+  current.count += 1;
+  return current.count > 60;
+}
 
 export async function GET(request: Request) {
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  if (overLimit(ip)) {
+    return Response.json({ error: "Muitas buscas em pouco tempo. Aguarde um minuto e tente novamente." }, {
+      status: 429,
+      headers: { "Cache-Control": "no-store", "Retry-After": "60" },
+    });
+  }
+
   const key = env.TMDB_API_KEY;
   if (!key) {
     return Response.json({ error: "A busca do TMDB ainda não foi configurada no servidor." }, {

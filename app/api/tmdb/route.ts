@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     });
   }
 
-  const key = env.TMDB_API_KEY;
+  const key = env.TMDB_API_KEY?.trim();
   if (!key) {
     return Response.json({ error: "A busca do TMDB ainda não foi configurada no servidor." }, {
       status: 503,
@@ -53,17 +53,20 @@ export async function GET(request: Request) {
     }
     target.searchParams.set(name, value);
   }
-  target.searchParams.set("api_key", key);
+  const readAccessToken = key.startsWith("eyJ") || key.length > 80;
+  if (!readAccessToken) target.searchParams.set("api_key", key);
 
   try {
+    const headers = new Headers({ accept: "application/json" });
+    if (readAccessToken) headers.set("Authorization", `Bearer ${key}`);
     const upstream = await fetch(target, {
-      headers: { accept: "application/json" },
+      headers,
       signal: AbortSignal.timeout(12000),
       redirect: "manual",
     });
     if (!upstream.ok) {
       return Response.json(
-        { error: upstream.status === 401 ? "A chave TMDB do servidor precisa ser atualizada." : "O TMDB não conseguiu concluir a busca." },
+        { error: upstream.status === 401 ? "A credencial TMDB do servidor foi rejeitada. Confira se o secret contém uma API Key v3 ou um Read Access Token válido." : "O TMDB não conseguiu concluir a busca." },
         { status: upstream.status === 401 ? 503 : upstream.status, headers: { "Cache-Control": "no-store" } },
       );
     }

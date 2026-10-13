@@ -150,7 +150,9 @@ const glass=ctx.createLinearGradient(x,y-42,x,y+42);glass.addColorStop(0,'#243a5
 function caseShape(a,b,w,h,r){ctx.shadowColor='#000b';ctx.shadowBlur=14;roundRect(ctx,a,b,w,h,r,metal,'#ffffffb0');ctx.shadowBlur=0}
 function screen(a,b,w,h,r){ctx.save();ctx.beginPath();ctx.roundRect(a,b,w,h,r);ctx.clip();ctx.fillStyle=glass;ctx.fillRect(a,b,w,h);const glow=ctx.createRadialGradient(a+w*.23,b+h*.14,1,a+w*.34,b+h*.24,w*.85);glow.addColorStop(0,C.accent+'72');glow.addColorStop(.28,C.accent+'20');glow.addColorStop(1,'#090b1000');ctx.fillStyle=glow;ctx.fillRect(a,b,w,h);const sheen=ctx.createLinearGradient(a,b,a+w*.7,b+h);sheen.addColorStop(0,'#ffffff35');sheen.addColorStop(.25,'#ffffff08');sheen.addColorStop(.58,'#ffffff00');sheen.addColorStop(1,'#ffffff00');ctx.fillStyle=sheen;ctx.fillRect(a,b,w,h);ctx.restore()}
 function line(x1,y1,x2,y2,color,width){ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()}
-if(type==='phone'){
+if(type==='tv'){
+ caseShape(x-53,y-36,106,65,7);screen(x-47,y-30,94,52,3);ctx.strokeStyle='#cbd0d7';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(x,y+29);ctx.lineTo(x,y+37);ctx.moveTo(x-17,y+40);ctx.lineTo(x+17,y+40);ctx.stroke();ctx.fillStyle=C.accent;ctx.beginPath();ctx.arc(x+43,y+25,1.8,0,Math.PI*2);ctx.fill();
+}else if(type==='phone'){
  caseShape(x-23,y-45,46,90,10);roundRect(ctx,x-19,y-40,38,80,6,'#070a0e','#0b0d11');screen(x-17,y-37,34,74,5);roundRect(ctx,x-5,y-34,10,2.5,1.2,'#111720');ctx.fillStyle='#9299a4';ctx.beginPath();ctx.arc(x+9,y-33,1.5,0,Math.PI*2);ctx.fill();line(x-6,y+35,x+6,y+35,'#d8dce1',1.5);
 }else if(type==='tablet'){
  caseShape(x-34,y-46,68,92,10);roundRect(ctx,x-29,y-40,58,80,6,'#070a0e','#0b0d11');screen(x-27,y-37,54,74,4);ctx.fillStyle='#969da7';ctx.beginPath();ctx.arc(x,y-42.5,1.5,0,Math.PI*2);ctx.fill();line(x-7,y+42,x+7,y+42,'#d8dce1',1.4);
@@ -163,7 +165,7 @@ if(type==='phone'){
 }
 ctx.restore()
 }
-function drawDevices(y,center=540,gap=190,scale=1,labelSize=17,items=[['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]){const start=center-gap*(items.length-1)/2;ctx.save();ctx.textAlign='center';ctx.fillStyle=C.text;items.forEach((it,i)=>{const x=start+i*gap;ctx.globalAlpha=.96;ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);drawDevice(it[0],0,0);ctx.restore();ctx.globalAlpha=.9;ctx.font=`750 ${labelSize}px system-ui`;ctx.fillText(it[1],x,y+73*scale)});ctx.restore();ctx.globalAlpha=1}
+function drawDevices(y,center=540,gap=190,scale=1,labelSize=17,items=[['tv','SMART TV'],['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]){const start=center-gap*(items.length-1)/2;ctx.save();ctx.textAlign='center';ctx.fillStyle=C.text;items.forEach((it,i)=>{const x=start+i*gap;ctx.globalAlpha=.96;ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);drawDevice(it[0],0,0);ctx.restore();ctx.globalAlpha=.9;ctx.font=`750 ${labelSize}px system-ui`;ctx.fillText(it[1],x,y+73*scale)});ctx.restore();ctx.globalAlpha=1}
 function draw(){
 const W=canvas.width,H=canvas.height;ctx.clearRect(0,0,W,H);drawBackground();
 const title=$('title').value||'Título do conteúdo',year=$('year').value||'2026',rating=$('rating').value||'—',kind=$('kind').value,platform=$('platform').value,cta=$('cta').value||'ASSISTA AGORA!',overview=$('overview').value||'Escolha um filme ou série no TMDB para carregar a sinopse. Você também pode escrever seu próprio texto.',foot=$('footerText').value.trim(),brandPos=$('brandPosition').value;
@@ -184,7 +186,7 @@ if(layout==='cinema'){
  ctx.globalAlpha=.96;wrapText(overview,W/2,metaY+125,890,43,3,'550 29px system-ui',C.text,'center');ctx.globalAlpha=1;
  const ctaY=metaY+310;ctaButton(210,ctaY,660,92,cta);
  if(foot){ctx.fillStyle=C.text;ctx.textAlign='center';ctx.font='750 25px system-ui';ctx.fillText(foot,540,ctaY+105)}
- deviceRow(1780,brandPos==='footer'||brandPos==='both'?600:500,brandPos==='footer'||brandPos==='both'?135:174,1,17,[['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]);
+ deviceRow(1780,brandPos==='footer'||brandPos==='both'?580:540,brandPos==='footer'||brandPos==='both'?130:150,1,17,[['tv','SMART TV'],['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]);
  if(brandPos==='footer'||brandPos==='both')brandAt(38,1887,.55,false);attribution(1905);
 }else if(layout==='wide'){
  posterFrame(72,120,455,682,20);
@@ -196,7 +198,7 @@ if(layout==='cinema'){
  ctx.globalAlpha=.96;wrapText(overview,620,565,1160,54,4,'560 36px system-ui',C.text,'left');ctx.globalAlpha=1;
  ctaButton(620,805,470,88,cta);
  if(foot){ctx.fillStyle=C.text;ctx.textAlign='center';ctx.font='750 22px system-ui';ctx.fillText(foot,1390,925)}
- deviceRow(985,1350,160,1,18,[['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]);
+ deviceRow(985,1350,130,1,18,[['tv','SMART TV'],['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]);
  if(brandPos==='footer'||brandPos==='both')brandAt(72,1010,.58,false);attribution(1073,true);
 }else{
  topLogo(135,1.02);pill(year,70,245,190,C.accent,C.text,24);pill(kind,280,245,220,'rgba(12,10,16,.8)',C.text,24,'#ffffff55');
@@ -207,7 +209,7 @@ if(layout==='cinema'){
  ctaButton(70,1330,465,86,cta);
  if(foot){ctx.fillStyle=C.text;ctx.textAlign='left';ctx.font='750 22px system-ui';ctx.fillText(foot,72,1500)}
  if($('showProps').checked)drawPopcorn(790,1420,.62);
- deviceRow(1690,540,174,.95,17,[['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]);
+ deviceRow(1690,540,150,.95,17,[['tv','SMART TV'],['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]);
  if(brandPos==='footer'||brandPos==='both')brandAt(38,1887,.55,false);attribution(1887);
 }
 }

@@ -32,6 +32,8 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-vis
 @media(max-width:1020px){.studio-grid{grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:14px}.editor{padding:16px}.canvaswrap{padding:14px;min-height:320px}.advanced-grid{gap:12px}.custom-card{padding:15px}}
 @media(max-width:760px){.top{height:62px;padding:0 15px}.topnote{display:none}.brandmark{width:34px;height:34px}.status-pill{font-size:10px;padding:7px 9px}.shell{padding:22px 14px 36px}.hero{display:block;margin-bottom:17px}.hero h1{font-size:29px;max-width:470px}.hero p{font-size:13px;max-width:520px}.hero-format{display:inline-flex;margin-top:11px}.studio-grid{display:flex;flex-direction:column;gap:14px}.editor{order:0;width:100%;padding:16px}.preview{order:1;position:static;width:100%}.preview-head{padding:13px 14px}.canvaswrap{min-height:0;padding:13px}.preview-foot{align-items:flex-start;flex-direction:column;padding:12px 13px}.preview-actions{width:100%}.preview-actions .download{flex:1}.advanced-grid{grid-template-columns:1fr;gap:12px;margin-top:14px}.custom-card{padding:16px}.layout-options{gap:6px}.layout-option{padding:8px 6px}.layout-thumb{height:52px}.section{padding-bottom:16px;margin-bottom:16px}.field-grid{gap:8px}}
 @media(max-width:380px){.status-pill{gap:5px;font-size:9px}.editor{padding:13px}.layout-name{font-size:9px}.layout-desc{font-size:8px}.layout-thumb{height:45px}.field-grid{grid-template-columns:1fr 1fr}}
+ .format-select{height:40px;min-width:112px;padding:8px 10px}.share{white-space:nowrap}
+@media(max-width:760px){.studio-grid .preview{order:0}.studio-grid .editor{order:1}.preview-actions{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.preview-actions>*{width:100%;min-width:0}}
 </style></head>
 <body>
 <header class="top">
@@ -90,7 +92,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-vis
   <section class="card preview" aria-label="Prévia do banner">
    <div class="preview-head"><div class="preview-heading"><i class="live-dot"></i><strong>Prévia ao vivo</strong></div><span id="dimensions">1080 × 1920 px · 9:16</span></div>
    <div class="canvaswrap"><canvas id="canvas" width="1080" height="1920" aria-label="Prévia do banner"></canvas></div>
-   <div class="preview-foot"><span>Pronto para baixar e compartilhar em alta resolução.</span><div class="preview-actions"><button id="reset" class="secondary">Restaurar</button><button id="download" class="primary download"><span aria-hidden="true">↓</span> Baixar PNG</button></div></div>
+   <div class="preview-foot"><span>Pronto para baixar ou compartilhar em alta resolução.</span><div class="preview-actions"><select id="exportFormat" class="secondary format-select" aria-label="Formato do arquivo"><option value="png">PNG · alta qualidade</option><option value="jpg">JPG · arquivo leve</option></select><button id="reset" class="secondary">Restaurar</button><button id="download" class="primary download"><span aria-hidden="true">↓</span> Baixar</button><button id="share" class="secondary share" type="button">↗ Compartilhar</button></div></div>
   </section>
  </div>
  <section class="advanced-grid" aria-label="Personalização do banner">
@@ -165,7 +167,7 @@ if(type==='tv'){
 }
 ctx.restore()
 }
-function drawDevices(y,center=540,gap=190,scale=1,labelSize=17,items=[['tv','SMART TV'],['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]){const start=center-gap*(items.length-1)/2;ctx.save();ctx.textAlign='center';ctx.fillStyle=C.text;items.forEach((it,i)=>{const x=start+i*gap;ctx.globalAlpha=.96;ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);drawDevice(it[0],0,0);ctx.restore();ctx.globalAlpha=.9;ctx.font=`750 ${labelSize}px system-ui`;ctx.fillText(it[1],x,y+73*scale)});ctx.restore();ctx.globalAlpha=1}
+function drawDevices(y,center=540,gap=190,scale=1,labelSize=20,items=[['tv','SMART TV'],['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]){const start=center-gap*(items.length-1)/2;ctx.save();ctx.textAlign='center';ctx.fillStyle=C.text;ctx.shadowColor='#000b';ctx.shadowBlur=5;items.forEach((it,i)=>{const x=start+i*gap;ctx.globalAlpha=.98;ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);drawDevice(it[0],0,0);ctx.restore();ctx.globalAlpha=.94;ctx.font=`750 ${labelSize}px system-ui`;ctx.fillText(it[1],x,y+79*scale)});ctx.restore();ctx.globalAlpha=1;ctx.shadowBlur=0}
 function draw(){
 const W=canvas.width,H=canvas.height;ctx.clearRect(0,0,W,H);drawBackground();
 const title=$('title').value||'Título do conteúdo',year=$('year').value||'2026',rating=$('rating').value||'—',kind=$('kind').value,platform=$('platform').value,cta=$('cta').value||'ASSISTA AGORA!',overview=$('overview').value||'Escolha um filme ou série no TMDB para carregar a sinopse. Você também pode escrever seu próprio texto.',foot=$('footerText').value.trim(),brandPos=$('brandPosition').value;
@@ -176,7 +178,6 @@ function metaBar(x,y,w,text){ctx.save();roundRect(ctx,x,y,w,62,31,'rgba(12,10,16
 function ctaButton(x,y,w,h,label){ctx.save();ctx.shadowColor=C.button+'77';ctx.shadowBlur=20;const g=ctx.createLinearGradient(x,y,x+w,y+h);g.addColorStop(0,C.button);g.addColorStop(1,C.accent);roundRect(ctx,x,y,w,h,h/2,g);ctx.shadowBlur=0;ctx.fillStyle=C.text;ctx.textAlign='center';ctx.font='900 '+Math.min(35,h*.38)+'px system-ui';ctx.fillText('▶  '+label,x+w/2,y+h*.62);ctx.restore()}
 function posterFrame(x,y,w,h,r,angle){r=r||20;angle=angle||0;ctx.save();ctx.translate(x+w/2,y+h/2);ctx.rotate(angle);ctx.translate(-w/2,-h/2);ctx.shadowColor='#000c';ctx.shadowBlur=32;roundRect(ctx,0,0,w,h,r,'#09080d','#ffffff70');ctx.shadowBlur=0;ctx.save();ctx.beginPath();ctx.roundRect(0,0,w,h,r);ctx.clip();if(posterImg)imageCover(posterImg,0,0,w,h);else if(backdropImg)imageCover(backdropImg,0,0,w,h);else{const g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,C.accent);g.addColorStop(1,C.bg);ctx.fillStyle=g;ctx.fillRect(0,0,w,h);ctx.fillStyle='#ffffffbb';ctx.textAlign='center';ctx.font='800 28px system-ui';ctx.fillText('PÔSTER DO FILME',w/2,h/2)}ctx.restore();ctx.strokeStyle='#ffffff99';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(0,0,w,h,r);ctx.stroke();ctx.restore()}
 function topLogo(y,size){if(brandPos==='top'||brandPos==='both')brandAt(W/2,y,size||1,true)}
-function attribution(){/* Removido da arte exportada. */}
 function deviceRow(y,center,gap,scale,labelSize,items){if($('showDevices').checked)drawDevices(y,center,gap,scale,labelSize,items)}
 if(layout==='cinema'){
  topLogo(135,1.05);pill('DISPONÍVEL AGORA',315,205,450,'rgba(8,7,12,.78)',C.accent,24,'#ffffff55');
@@ -186,8 +187,8 @@ if(layout==='cinema'){
  ctx.globalAlpha=.96;wrapText(overview,W/2,metaY+125,890,43,3,'550 29px system-ui',C.text,'center');ctx.globalAlpha=1;
  const ctaY=metaY+310;ctaButton(210,ctaY,660,92,cta);
  if(foot){ctx.fillStyle=C.text;ctx.textAlign='center';ctx.font='750 25px system-ui';ctx.fillText(foot,540,ctaY+105)}
- deviceRow(1780,brandPos==='footer'||brandPos==='both'?580:540,brandPos==='footer'||brandPos==='both'?130:150,1,17,[['tv','SMART TV'],['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]);
- if(brandPos==='footer'||brandPos==='both')brandAt(38,1887,.55,false);attribution(1905);
+ deviceRow(brandPos==='footer'||brandPos==='both'?1764:1772,540,145,1,20,[['tv','SMART TV'],['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]);
+ if(brandPos==='footer'||brandPos==='both')brandAt(38,1905,.55,false);
 }else if(layout==='wide'){
  posterFrame(72,120,455,682,20);
  pill('JÁ DISPONÍVEL',620,112,370,'rgba(8,7,12,.82)',C.accent,25,'#ffffff55');
@@ -198,8 +199,8 @@ if(layout==='cinema'){
  ctx.globalAlpha=.96;wrapText(overview,620,565,1160,54,4,'560 36px system-ui',C.text,'left');ctx.globalAlpha=1;
  ctaButton(620,805,470,88,cta);
  if(foot){ctx.fillStyle=C.text;ctx.textAlign='center';ctx.font='750 22px system-ui';ctx.fillText(foot,1390,925)}
- deviceRow(985,1350,130,1,18,[['tv','SMART TV'],['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]);
- if(brandPos==='footer'||brandPos==='both')brandAt(72,1010,.58,false);attribution(1073,true);
+ deviceRow(970,1350,145,1,19,[['tv','SMART TV'],['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]);
+ if(brandPos==='footer'||brandPos==='both')brandAt(72,1010,.58,false);
 }else{
  topLogo(135,1.02);pill(year,70,245,190,C.accent,C.text,24);pill(kind,280,245,220,'rgba(12,10,16,.8)',C.text,24,'#ffffff55');
  ctx.textAlign='left';wrapText(title,70,410,470,72,4,'900 58px system-ui',C.text,'left');
@@ -209,8 +210,8 @@ if(layout==='cinema'){
  ctaButton(70,1330,465,86,cta);
  if(foot){ctx.fillStyle=C.text;ctx.textAlign='left';ctx.font='750 22px system-ui';ctx.fillText(foot,72,1500)}
  if($('showProps').checked)drawPopcorn(790,1420,.62);
- deviceRow(1690,540,150,.95,17,[['tv','SMART TV'],['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]);
- if(brandPos==='footer'||brandPos==='both')brandAt(38,1887,.55,false);attribution(1887);
+ deviceRow(1690,540,145,.95,20,[['tv','SMART TV'],['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]);
+ if(brandPos==='footer'||brandPos==='both')brandAt(38,1905,.55,false);
 }
 }
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400)}function loadImg(url,type){if(!url)return;const im=new Image();if(url.startsWith('http'))im.crossOrigin='anonymous';im.onload=()=>{if(type==='poster')posterImg=im;else backdropImg=im;draw()};im.onerror=()=>{toast('Não foi possível carregar essa imagem.');if(type==='poster')posterImg=null;else backdropImg=null;draw()};im.src=url}
@@ -219,7 +220,11 @@ async function search(){const term=$('search').value.trim(),key=$('apiKey').valu
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 async function selectResult(item,headers,key,token){const type=item.media_type;const url=`https://api.themoviedb.org/3/${type}/${item.id}?language=pt-BR&append_to_response=images${token?'':'&api_key='+encodeURIComponent(key)}`;try{const res=await fetch(url,{headers});if(!res.ok)throw Error();const d=await res.json();$('title').value=d.title||d.name||item.title||item.name||'';$('year').value=(d.release_date||d.first_air_date||'').slice(0,4)||'';$('rating').value=Number(d.vote_average||item.vote_average||0).toFixed(1);$('kind').value=type==='movie'?'FILME':'SÉRIE';$('overview').value=d.overview||item.overview||'';const back=d.backdrop_path||item.backdrop_path,post=d.poster_path||item.poster_path;backdropUrl=back?'https://image.tmdb.org/t/p/original'+back:'';posterUrl=post?'https://image.tmdb.org/t/p/w780'+post:'';backdropImg=null;posterImg=null;if(backdropUrl)loadImg(backdropUrl,'backdrop');if(posterUrl)loadImg(posterUrl,'poster');$('status').textContent='Informações carregadas. Você pode editar os campos e baixar o banner.';$('results').innerHTML='';draw()}catch(e){$('status').textContent='Não foi possível carregar os detalhes. Tente outro resultado.'}}
 $('posterFile').onchange=e=>readFile(e.target.files[0],'poster');$('backdropFile').onchange=e=>readFile(e.target.files[0],'backdrop');function readFile(f,type){if(!f)return;const u=URL.createObjectURL(f);if(type==='poster')posterUrl=u;else backdropUrl=u;loadImg(u,type)}
-$('download').onclick=()=>{draw();try{const a=document.createElement('a');a.download=(($('title').value||'banner').trim().replace(/[^\p{L}\p{N}]+/gu,'-').replace(/^-|-$/g,'')||'banner')+'-wrplay.png';a.href=canvas.toDataURL('image/png');a.click()}catch(e){toast('A imagem escolhida não permite exportação. Baixe-a e envie pelo botão de imagem do aparelho.')}};
-$('reset').onclick=()=>{if(!confirm('Limpar o banner e voltar ao modelo inicial?'))return;setLayout('cinema');posterUrl=backdropUrl='';posterImg=backdropImg=null;$('title').value='Seu título aqui';$('year').value='2026';$('rating').value='8.0';$('kind').value='FILME';$('platform').value='';$('cta').value='ASSISTA AGORA!';$('overview').value='';$('brandText').value='wrplay';$('footerText').value='';$('backgroundMode').value='image';$('shade').value='78';$('blur').value='14';$('shadeValue').textContent='78%';$('blurValue').textContent='14 px';$('brandPosition').value='top';$('showProps').checked=false;$('showDevices').checked=true;$('showWatermark').checked=false;setTheme(themes[0]);$('results').innerHTML='';$('status').textContent='Chave do TMDB pronta. Busque um filme ou série.';draw()};
+function exportName(ext){return (($('title').value||'banner').trim().replace(/[^\p{L}\p{N}]+/gu,'-').replace(/^-|-$/g,'')||'banner')+'-wrplay.'+ext}
+function exportBlob(){const jpg=$('exportFormat').value==='jpg';return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Não foi possível criar o arquivo.')),jpg?'image/jpeg':'image/png',.94))}
+async function saveBanner(blob,name){const a=document.createElement('a');a.download=name;a.href=URL.createObjectURL(blob);a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}
+$('download').onclick=async()=>{draw();try{const ext=$('exportFormat').value,blob=await exportBlob();await saveBanner(blob,exportName(ext))}catch(e){toast('Não foi possível exportar este banner. Tente novamente ou envie a imagem novamente.')}};
+$('share').onclick=async()=>{draw();try{const ext=$('exportFormat').value,blob=await exportBlob(),file=new File([blob],exportName(ext),{type:blob.type});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Banner WRplay',text:'Banner pronto para compartilhar.'});return}await saveBanner(blob,exportName(ext));toast('Seu aparelho não permite compartilhar direto. O banner foi baixado para você enviar.')}catch(e){if(e.name!=='AbortError')toast('Não foi possível compartilhar. Tente baixar o banner.')}};
+$('reset').onclick=()=>{if(!confirm('Limpar o banner e voltar ao modelo inicial?'))return;setLayout('cinema');posterUrl=backdropUrl='';posterImg=backdropImg=null;$('title').value='Seu título aqui';$('year').value='2026';$('rating').value='8.0';$('kind').value='FILME';$('platform').value='';$('cta').value='ASSISTA AGORA!';$('overview').value='';$('brandText').value='wrplay';$('footerText').value='';$('backgroundMode').value='image';$('shade').value='78';$('blur').value='14';$('shadeValue').textContent='78%';$('blurValue').textContent='14 px';$('brandPosition').value='top';$('showProps').checked=false;$('showDevices').checked=true;$('showWatermark').checked=false;$('exportFormat').value='png';setTheme(themes[0]);$('results').innerHTML='';$('status').textContent='Chave do TMDB pronta. Busque um filme ou série.';draw()};
 draw();setLayout('cinema');
 </script></body></html>

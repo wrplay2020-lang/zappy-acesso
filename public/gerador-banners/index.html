@@ -100,7 +100,7 @@ if(layout==='cinema'){
  pill(kind,660,505,205,'#d71920',C.text,31);ctx.fillStyle=C.text;ctx.font='700 31px system-ui';ctx.fillText(`${year}${platform?'  •  '+platform:''}`,895,545);
  ctx.globalAlpha=.96;wrapText(overview,660,630,1170,68,3,'650 44px system-ui',C.text,'left');ctx.globalAlpha=1;
  roundRect(ctx,660,815,520,90,45,C.button);ctx.fillStyle=C.text;ctx.textAlign='center';ctx.font='900 37px system-ui';ctx.fillText(cta,920,874);
- if($('showDevices').checked)drawDevices(970,1230,250,1,24,[['phone','CELULAR'],['laptop','NOTEBOOK'],['tv','SMART TV']]);
+ if($('showDevices').checked)drawDevices(985,1230,250,1,24,[['phone','CELULAR'],['laptop','NOTEBOOK'],['tv','SMART TV']]);
  if(brandPos==='top'||brandPos==='both')brandAt(1640,170,.88);if(brandPos==='footer'||brandPos==='both')brandAt(1640,1000,.7);
  if(foot){ctx.fillStyle=C.text;ctx.textAlign='center';ctx.font='900 24px system-ui';ctx.fillText(foot,W/2,1060)}attribution(1074);
 }else{

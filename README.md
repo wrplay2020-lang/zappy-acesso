@@ -11,6 +11,8 @@ Código da página pública e da rota segura que cria o teste Zappy. A chave da 
 5. Instale dependências com `corepack pnpm install --frozen-lockfile`, rode `corepack pnpm build` e implante com `corepack pnpm deploy` após autenticar o Wrangler na sua conta Cloudflare.
 6. Para publicar automaticamente a cada atualização no GitHub, conecte o repositório em **Cloudflare → Workers & Pages → Import a repository**. Escolha o Worker de nome `zappy-acesso`, comando de build `corepack pnpm install --frozen-lockfile && corepack pnpm build` e comando de implantação `npx wrangler deploy --config dist/server/wrangler.json`.
 
+A busca de filmes do gerador usa a rota segura `/api/tmdb`. Configure a credencial do TMDB como secret do Worker com `npx wrangler secret put TMDB_API_KEY`; não a salve no HTML nem em arquivos do repositório. Como a credencial usada antes ficou exposta no código público e no histórico do Git, revogue-a no TMDB e cadastre uma nova como secret antes de usar a busca.
+
 A API exige D1 e a chave secreta; sem ambos, o formulário mostra indisponibilidade. A rota bloqueia requisições vindas de outra origem e limita tentativas por IP. Não publique apenas a pasta `public` pelo GitHub Pages, pois isso não executará `/api/trial`.
 
 O endereço de produção será o subdomínio `workers.dev` atribuído à sua conta ou um domínio próprio. Atualizações no GitHub podem ser conectadas às compilações do Cloudflare Workers depois da primeira implantação.

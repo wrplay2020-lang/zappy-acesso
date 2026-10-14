@@ -254,7 +254,7 @@ if(layout==='cinema'){
  if(brandPos==='top'||brandPos==='both')brandAt(1585,160,.83,false);
  ctx.textAlign='left';wrapText(title,620,285,1190,86,2,'900 76px system-ui',C.text,'left');
  ctx.fillStyle='#ffd34f';ctx.font='900 53px system-ui';ctx.fillText('★★★★★',620,410);ctx.fillStyle='#77717b';ctx.fillText('★',904,410);ctx.fillStyle=C.text;ctx.font='850 43px system-ui';ctx.fillText(String(rating).replace('.',','),978,410);
- pill(kind,620,452,190,'#c92d34',C.text,25);ctx.fillStyle=C.text;ctx.textAlign='left';ctx.font='650 27px system-ui';ctx.fillText(year+(platform?'  •  '+platform:''),835,486);
+ pill(kind,620,452,190,'#c92d34',C.text,25);ctx.fillStyle=C.text;ctx.textAlign='left';ctx.font='650 27px system-ui';ctx.fillText(year,835,486);
  ctx.globalAlpha=.96;wrapText(overview,620,565,1160,54,4,'560 36px system-ui',C.text,'left');ctx.globalAlpha=1;
  ctaButton(620,805,420,88,cta);
  if(foot){ctx.fillStyle=C.text;ctx.textAlign='left';ctx.font='750 22px system-ui';ctx.fillText(foot,620,925)}

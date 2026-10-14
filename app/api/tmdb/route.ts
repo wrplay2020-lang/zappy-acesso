@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 
-const allowedParams = new Set(["query", "language", "append_to_response"]);
+const allowedParams = new Set(["query", "language", "append_to_response", "region"]);
 const requestCounts = new Map<string, { count: number; expires: number }>();
 
 function overLimit(ip: string) {
@@ -34,7 +34,7 @@ export async function GET(request: Request) {
 
   const incoming = new URL(request.url);
   const path = incoming.searchParams.get("path") || "";
-  if (!/^(search\/multi|movie\/\d{1,10}|tv\/\d{1,10})$/.test(path)) {
+  if (!/^(search\/multi|movie\/(popular|\d{1,10})|tv\/(popular|\d{1,10}))$/.test(path)) {
     return Response.json({ error: "Consulta TMDB inválida." }, { status: 400 });
   }
 
@@ -51,6 +51,9 @@ export async function GET(request: Request) {
     if (name === "language" && !/^[a-z]{2}-[A-Z]{2}$/.test(value)) {
       return Response.json({ error: "Idioma inválido." }, { status: 400 });
     }
+    if (name === "region" && !/^[A-Z]{2}$/.test(value)) {
+      return Response.json({ error: "Região inválida." }, { status: 400 });
+    }
     target.searchParams.set(name, value);
   }
   const readAccessToken = key.startsWith("eyJ") || key.length > 80;
@@ -58,7 +61,7 @@ export async function GET(request: Request) {
 
   try {
     const headers = new Headers({ accept: "application/json" });
-    if (readAccessToken) headers.set("Authorization", `Bearer ${key}`);
+    if (readAccessToken) headers.set("Authorization", "Bearer " + key);
     const upstream = await fetch(target, {
       headers,
       signal: AbortSignal.timeout(12000),

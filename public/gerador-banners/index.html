@@ -46,6 +46,9 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-vis
 .preview-head #enlargePreview{padding:6px 10px;min-height:32px;white-space:nowrap}
 @media(max-width:760px){.preview-head{flex-wrap:wrap}.preview-head #dimensions{margin-left:auto}.layout-alert{margin:9px 12px 0}}
  .secondary.selected{border-color:#d174f5;background:#2b2033;color:#fff;box-shadow:0 0 0 2px #b448d31c}@media(max-width:760px){.copy-info{grid-column:1/-1}}@media(max-width:760px){.preview{display:flex;flex-direction:column}.preview-head{order:0}.canvaswrap{order:1}.project-tools{order:2}.layout-alert{order:3}.preview-foot{order:4}canvas{max-height:min(76svh,calc(100svh - 185px))}}.project-tools{display:none!important}#exportFormat,#reset,#share{display:none!important}.preview-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:min(100%,420px);gap:10px}.preview-actions>*{width:100%;min-width:0}.preview-actions #copyInfo{order:0}.preview-actions #download{order:1}@media(max-width:760px){.preview-actions{grid-template-columns:1fr;width:100%}}.model-section>:not(.section-head):not(.layout-options){display:none!important}.advanced-grid[hidden]{display:none!important}
+
+/* Modelos principais inspirados nas referências WRplay/Omega. */
+.layout-options{grid-template-columns:repeat(2,minmax(0,1fr))}.layout-option[data-layout="wide"]{display:none!important}
 </style></head>
 <body>
 <header class="top">
@@ -89,7 +92,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-vis
     <div class="layout-options">
      <button class="layout-option selected" data-layout="cinema" aria-pressed="true">
       <span class="layout-thumb"><svg viewBox="0 0 64 56" aria-hidden="true"><rect x="18" y="3" width="28" height="49" rx="4" fill="#17121d" stroke="#d77aff" stroke-width="1.5"/><rect x="22" y="8" width="20" height="24" rx="2" fill="#624177"/><rect x="23" y="36" width="18" height="2.5" rx="1" fill="#fff"/><rect x="25" y="41" width="14" height="2" rx="1" fill="#9d91a8"/><rect x="24" y="46" width="16" height="3" rx="1.5" fill="#f63f78"/></svg></span>
-      <span class="layout-name">Cinema no tablet</span><span class="layout-desc">Capa inteira no tablet · 2:3</span>
+      <span class="layout-name">Clássico Cinema</span><span class="layout-desc">Capa em destaque e ficha do conteúdo.</span>
      </button>
      <button class="layout-option" data-layout="wide" aria-pressed="false">
       <span class="layout-thumb"><svg viewBox="0 0 64 56" aria-hidden="true"><rect x="3" y="10" width="58" height="36" rx="4" fill="#17121d" stroke="#d77aff" stroke-width="1.5"/><rect x="7" y="14" width="16" height="28" rx="2" fill="#624177"/><rect x="28" y="17" width="27" height="3" rx="1.5" fill="#fff"/><rect x="28" y="23" width="22" height="2" rx="1" fill="#9d91a8"/><rect x="28" y="28" width="25" height="2" rx="1" fill="#9d91a8"/><rect x="28" y="35" width="15" height="5" rx="2.5" fill="#f63f78"/></svg></span>
@@ -97,7 +100,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-vis
      </button>
      <button class="layout-option" data-layout="editorial" aria-pressed="false">
       <span class="layout-thumb"><svg viewBox="0 0 64 56" aria-hidden="true"><rect x="8" y="3" width="48" height="50" rx="4" fill="#17121d" stroke="#d77aff" stroke-width="1.5"/><rect x="34" y="13" width="17" height="28" rx="2" fill="#624177"/><rect x="13" y="14" width="17" height="3" rx="1.5" fill="#fff"/><rect x="13" y="21" width="17" height="2" rx="1" fill="#9d91a8"/><rect x="13" y="26" width="17" height="2" rx="1" fill="#9d91a8"/><rect x="13" y="34" width="15" height="5" rx="2.5" fill="#f63f78"/></svg></span>
-      <span class="layout-name">Pôster de impacto</span><span class="layout-desc">Capa central e cinema · 9:16</span>
+      <span class="layout-name">Celular Premium</span><span class="layout-desc">Capa do TMDB na tela do celular.</span>
      </button>
     </div>
     <div class="upload-row">
@@ -303,16 +306,16 @@ if(layout==='cinema'){
 }else{
  if(format!=='story'){
   if(format==='feed'){
-   topLogo(88,.78);pill(year,70,160,190,C.accent,C.text,22);pill(kind,280,160,220,'rgba(12,10,16,.8)',C.text,22,'#ffffff55');wrapText(title,70,350,490,58,4,'900 48px system-ui',C.text,'left');ctx.fillStyle='#ffd34f';ctx.font='900 31px system-ui';ctx.fillText('★★★★',72,600);ctx.fillStyle='#77717b';ctx.fillText('★',205,600);ctx.fillStyle=C.text;ctx.font='850 28px system-ui';ctx.fillText(String(rating).replace('.',','),245,600);ctx.fillStyle=C.accent;ctx.font='900 20px system-ui';ctx.fillText('SINOPSE',72,680);wrapText(overview,72,720,465,34,6,'550 22px system-ui',C.text,'left');tabletPosterFrame(600,245,420,625);ctaButton(70,1060,465,66,cta);if(foot){ctx.fillStyle=C.text;ctx.textAlign='left';ctx.font='700 18px system-ui';ctx.fillText(foot,72,1150)}deviceRow(1120,540,145,.65,17,[['tv','SMART TV'],['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]);if(brandPos==='footer'||brandPos==='both')brandAt(38,1340,.45,false);drawContact(540,1270)
+   topLogo(88,.78);pill(year,70,160,190,C.accent,C.text,22);pill(kind,280,160,220,'rgba(12,10,16,.8)',C.text,22,'#ffffff55');wrapText(title,70,350,490,58,4,'900 48px system-ui',C.text,'left');ctx.fillStyle='#ffd34f';ctx.font='900 31px system-ui';ctx.fillText('★★★★',72,600);ctx.fillStyle='#77717b';ctx.fillText('★',205,600);ctx.fillStyle=C.text;ctx.font='850 28px system-ui';ctx.fillText(String(rating).replace('.',','),245,600);ctx.fillStyle=C.accent;ctx.font='900 20px system-ui';ctx.fillText('SINOPSE',72,680);wrapText(overview,72,720,465,34,6,'550 22px system-ui',C.text,'left');drawHoldingThumb(600,245,420,625);phonePosterFrame(600,245,420,625);ctaButton(70,1060,465,66,cta);if(foot){ctx.fillStyle=C.text;ctx.textAlign='left';ctx.font='700 18px system-ui';ctx.fillText(foot,72,1150)}deviceRow(1120,540,145,.65,17,[['tv','SMART TV'],['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]);if(brandPos==='footer'||brandPos==='both')brandAt(38,1340,.45,false);drawContact(540,1270)
   }else{
-   topLogo(66,.65);pill(year,70,125,180,C.accent,C.text,20);pill(kind,270,125,190,'rgba(12,10,16,.8)',C.text,20,'#ffffff55');wrapText(title,70,305,495,48,4,'900 42px system-ui',C.text,'left');ctx.fillStyle='#ffd34f';ctx.font='900 28px system-ui';ctx.fillText('★★★★',72,520);ctx.fillStyle='#77717b';ctx.fillText('★',190,520);ctx.fillStyle=C.text;ctx.font='850 25px system-ui';ctx.fillText(String(rating).replace('.',','),225,520);ctx.fillStyle=C.accent;ctx.font='900 18px system-ui';ctx.fillText('SINOPSE',72,590);wrapText(overview,72,625,500,26,6,'550 19px system-ui',C.text,'left');tabletPosterFrame(620,165,390,585);ctaButton(70,820,480,58,cta);if(foot){ctx.fillStyle=C.text;ctx.textAlign='left';ctx.font='700 16px system-ui';ctx.fillText(foot,72,900)}deviceRow(855,540,145,.62,15,[['tv','SMART TV'],['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]);if(brandPos==='footer'||brandPos==='both')brandAt(38,1062,.4,false);drawContact(540,1005)
+   topLogo(66,.65);pill(year,70,125,180,C.accent,C.text,20);pill(kind,270,125,190,'rgba(12,10,16,.8)',C.text,20,'#ffffff55');wrapText(title,70,305,495,48,4,'900 42px system-ui',C.text,'left');ctx.fillStyle='#ffd34f';ctx.font='900 28px system-ui';ctx.fillText('★★★★',72,520);ctx.fillStyle='#77717b';ctx.fillText('★',190,520);ctx.fillStyle=C.text;ctx.font='850 25px system-ui';ctx.fillText(String(rating).replace('.',','),225,520);ctx.fillStyle=C.accent;ctx.font='900 18px system-ui';ctx.fillText('SINOPSE',72,590);wrapText(overview,72,625,500,26,6,'550 19px system-ui',C.text,'left');drawHoldingThumb(620,165,390,585);phonePosterFrame(620,165,390,585);ctaButton(70,820,480,58,cta);if(foot){ctx.fillStyle=C.text;ctx.textAlign='left';ctx.font='700 16px system-ui';ctx.fillText(foot,72,900)}deviceRow(855,540,145,.62,15,[['tv','SMART TV'],['phone','CELULAR'],['tablet','TABLET'],['laptop','NOTEBOOK'],['stick','FIRE TV STICK'],['box','TV BOX']]);if(brandPos==='footer'||brandPos==='both')brandAt(38,1062,.4,false);drawContact(540,1005)
   }
   return
  }
  topLogo(105,1.02);
  const promo=ctx.createLinearGradient(0,180,W,1550);promo.addColorStop(0,'rgba(20,7,28,.12)');promo.addColorStop(.58,'rgba(149,57,5,.22)');promo.addColorStop(1,'rgba(245,111,10,.16)');ctx.fillStyle=promo;ctx.fillRect(0,0,W,H);
  pill(campaignLabel('JÁ DISPONÍVEL'),312,185,456,'rgba(9,7,12,.82)',C.accent,22,'#ffffff55');
-  tabletPosterFrame(300,300,480,710);
+  drawHoldingThumb(300,300,480,710);phonePosterFrame(300,300,480,710);
  const titleLines=wrapText(title,W/2,1090,920,58,2,'900 54px system-ui',C.text,'center');
  const metaY=titleLines>1?1220:1160;
  metaBar(225,metaY,630,kind+'  •  '+year+'  •  ★ '+String(rating).replace('.',','));
